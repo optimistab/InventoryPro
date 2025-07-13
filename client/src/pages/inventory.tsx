@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Search, Plus, Laptop, Monitor, Edit, Trash2, Package } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Plus, Laptop, Monitor, Edit, Trash2, Package, Filter } from "lucide-react";
 import { useState } from "react";
 import ProductForm from "@/components/forms/product-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -14,16 +15,35 @@ import type { Product } from "@shared/schema";
 export default function Inventory() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isProductFormOpen, setIsProductFormOpen] = useState(false);
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [conditionFilter, setConditionFilter] = useState<string>("all");
+  const [stockFilter, setStockFilter] = useState<string>("all");
 
   const { data: products, isLoading } = useQuery<Product[]>({
     queryKey: ["/api/products"],
   });
 
-  const filteredProducts = products?.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.sku.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredProducts = products?.filter(product => {
+    // Search filter
+    const matchesSearch = searchTerm === "" || 
+      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.sku.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // Category filter
+    const matchesCategory = categoryFilter === "all" || product.category === categoryFilter;
+
+    // Condition filter
+    const matchesCondition = conditionFilter === "all" || product.condition === conditionFilter;
+
+    // Stock filter
+    const matchesStock = stockFilter === "all" || 
+      (stockFilter === "in-stock" && product.stockQuantity > 0) ||
+      (stockFilter === "low-stock" && product.stockQuantity > 0 && product.stockQuantity <= 10) ||
+      (stockFilter === "out-of-stock" && product.stockQuantity === 0);
+
+    return matchesSearch && matchesCategory && matchesCondition && matchesStock;
+  }) || [];
 
   if (isLoading) {
     return (
@@ -92,19 +112,78 @@ export default function Inventory() {
       {/* Content */}
       <div className="p-6">
         {/* Search and Filters */}
-        <div className="flex items-center space-x-4 mb-6">
-          <div className="relative flex-1 max-w-md">
-            <Input
-              type="text"
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-            <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+        <div className="space-y-4 mb-6">
+          <div className="flex items-center space-x-4">
+            <div className="relative flex-1 max-w-md">
+              <Input
+                type="text"
+                placeholder="Search products..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+              <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+            </div>
+            <div className="text-sm text-gray-600">
+              {filteredProducts.length} of {products?.length || 0} products
+            </div>
           </div>
-          <div className="text-sm text-gray-600">
-            {filteredProducts.length} of {products?.length || 0} products
+          
+          {/* Filter Controls */}
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2">
+              <Filter className="h-4 w-4 text-gray-500" />
+              <span className="text-sm text-gray-600 font-medium">Filters:</span>
+            </div>
+            
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Categories</SelectItem>
+                <SelectItem value="laptop">Laptops</SelectItem>
+                <SelectItem value="desktop">Desktops</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={conditionFilter} onValueChange={setConditionFilter}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Condition" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Conditions</SelectItem>
+                <SelectItem value="new">New</SelectItem>
+                <SelectItem value="refurbished">Refurbished</SelectItem>
+                <SelectItem value="used">Used</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={stockFilter} onValueChange={setStockFilter}>
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Stock Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Stock</SelectItem>
+                <SelectItem value="in-stock">In Stock</SelectItem>
+                <SelectItem value="low-stock">Low Stock</SelectItem>
+                <SelectItem value="out-of-stock">Out of Stock</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {(categoryFilter !== "all" || conditionFilter !== "all" || stockFilter !== "all") && (
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => {
+                  setCategoryFilter("all");
+                  setConditionFilter("all");
+                  setStockFilter("all");
+                }}
+              >
+                Clear Filters
+              </Button>
+            )}
           </div>
         </div>
 
