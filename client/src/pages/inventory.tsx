@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Search, Plus, Laptop, Monitor, Edit, Trash2, Package } from "lucide-react";
 import { useState } from "react";
 import ProductForm from "@/components/forms/product-form";
@@ -37,17 +38,36 @@ export default function Inventory() {
           </div>
         </header>
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[...Array(6)].map((_, i) => (
-              <Card key={i}>
-                <CardContent className="p-6">
-                  <Skeleton className="h-32 w-full mb-4" />
-                  <Skeleton className="h-6 w-3/4 mb-2" />
-                  <Skeleton className="h-4 w-1/2" />
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Product</TableHead>
+                    <TableHead>SKU</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Stock</TableHead>
+                    <TableHead>Condition</TableHead>
+                    <TableHead className="w-[100px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {[...Array(6)].map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-24" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-12" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                      <TableCell><Skeleton className="h-4 w-16" /></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -88,7 +108,7 @@ export default function Inventory() {
           </div>
         </div>
 
-        {/* Products Grid */}
+        {/* Products Table */}
         {filteredProducts.length === 0 ? (
           <Card>
             <CardContent className="p-12 text-center">
@@ -104,81 +124,90 @@ export default function Inventory() {
             </CardContent>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredProducts.map((product) => (
-              <Card key={product.id} className="border border-gray-100 hover:shadow-md transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                        {product.category === "laptop" ? (
-                          <Laptop className="h-6 w-6 text-gray-600" />
-                        ) : (
-                          <Monitor className="h-6 w-6 text-gray-600" />
-                        )}
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">{product.name}</CardTitle>
-                        <p className="text-sm text-gray-600">{product.brand} - {product.model}</p>
-                      </div>
-                    </div>
-                    <div className="flex space-x-1">
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">SKU:</span>
-                      <span className="font-mono text-sm">{product.sku}</span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Price:</span>
-                      <span className="font-semibold">${parseFloat(product.price).toLocaleString()}</span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Stock:</span>
-                      <Badge 
-                        variant={product.stockQuantity > 10 ? "default" : product.stockQuantity > 0 ? "secondary" : "destructive"}
-                        className={
-                          product.stockQuantity > 10 
-                            ? "bg-green-100 text-success hover:bg-green-100" 
-                            : product.stockQuantity > 0
-                            ? "bg-yellow-100 text-warning hover:bg-yellow-100"
-                            : "bg-red-100 text-error hover:bg-red-100"
-                        }
-                      >
-                        {product.stockQuantity} units
-                      </Badge>
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Condition:</span>
-                      <Badge variant="outline">
-                        {product.condition}
-                      </Badge>
-                    </div>
-
-                    {product.specifications && (
-                      <div className="pt-2 border-t border-gray-100">
-                        <p className="text-xs text-gray-600 line-clamp-2">
-                          {product.specifications}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[50px]"></TableHead>
+                    <TableHead>Product</TableHead>
+                    <TableHead>SKU</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Stock</TableHead>
+                    <TableHead>Condition</TableHead>
+                    <TableHead className="w-[100px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredProducts.map((product) => (
+                    <TableRow key={product.id} className="hover:bg-gray-50">
+                      <TableCell>
+                        <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
+                          {product.category === "laptop" ? (
+                            <Laptop className="h-4 w-4 text-gray-600" />
+                          ) : (
+                            <Monitor className="h-4 w-4 text-gray-600" />
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{product.name}</div>
+                          <div className="text-sm text-gray-600">{product.brand} - {product.model}</div>
+                          {product.specifications && (
+                            <div className="text-xs text-gray-500 mt-1 max-w-xs truncate" title={product.specifications}>
+                              {product.specifications}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-mono text-sm">{product.sku}</span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="capitalize">
+                          {product.category}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-semibold">${parseFloat(product.price).toLocaleString()}</span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={product.stockQuantity > 10 ? "default" : product.stockQuantity > 0 ? "secondary" : "destructive"}
+                          className={
+                            product.stockQuantity > 10 
+                              ? "bg-green-100 text-green-800 hover:bg-green-100" 
+                              : product.stockQuantity > 0
+                              ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+                              : "bg-red-100 text-red-800 hover:bg-red-100"
+                          }
+                        >
+                          {product.stockQuantity}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="capitalize">
+                          {product.condition}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex space-x-1">
+                          <Button variant="ghost" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         )}
       </div>
 
