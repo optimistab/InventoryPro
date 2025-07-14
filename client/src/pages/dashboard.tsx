@@ -4,6 +4,7 @@ import SalesChart from "@/components/dashboard/sales-chart";
 import InventoryDistribution from "@/components/dashboard/inventory-distribution";
 import RecentSales from "@/components/dashboard/recent-sales";
 import QuickActions from "@/components/dashboard/quick-actions";
+import AlertsCard from "@/components/dashboard/alerts-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Plus } from "lucide-react";
@@ -61,6 +62,11 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           <SalesChart sales={sales} isLoading={salesLoading} />
           <InventoryDistribution products={products} isLoading={productsLoading} />
+        </div>
+
+        {/* Alerts Section */}
+        <div className="mb-8">
+          <AlertsCard products={products} isLoading={productsLoading} />
         </div>
 
         {/* Recent Activity */}
