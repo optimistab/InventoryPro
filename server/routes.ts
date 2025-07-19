@@ -6,7 +6,9 @@ import {
   insertClientSchema, 
   insertSaleSchema,
   insertClientRequirementSchema,
-  insertRecoveryItemSchema
+  insertRecoveryItemSchema,
+  insertProductDateEventSchema,
+  EVENT_TYPES
 } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -37,6 +39,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const productData = insertProductSchema.parse(req.body);
       const product = await storage.createProduct(productData);
+      
+      // Automatically track product addition date
+      await storage.createProductDateEvent({
+        productId: product.id,
+        eventType: EVENT_TYPES.PRODUCT_ADDED,
+        eventDate: new Date().toISOString(),
+        notes: `Product ${product.name} added to inventory`,
+        createdAt: new Date().toISOString()
+      });
+      
       res.status(201).json(product);
     } catch (error) {
       res.status(400).json({ message: "Invalid product data" });
@@ -157,6 +169,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const saleData = insertSaleSchema.parse(req.body);
       const sale = await storage.createSale(saleData);
+      
+      // Get product to check if this is first sale or resale
+      const product = await storage.getProduct(sale.productId);
+      const existingSales = await storage.getSalesByProduct(sale.productId);
+      const isFirstSale = existingSales.length === 1; // Just created this sale
+      
+      // Automatically track sale event
+      await storage.createProductDateEvent({
+        productId: sale.productId,
+        clientId: sale.clientId,
+        eventType: isFirstSale ? EVENT_TYPES.FIRST_SALE : EVENT_TYPES.RESALE_TO_CUSTOMER,
+        eventDate: sale.saleDate,
+        notes: `Product sold to customer${product ? ` - ${product.name}` : ''}`,
+        createdAt: new Date().toISOString()
+      });
+      
       res.status(201).json(sale);
     } catch (error) {
       res.status(400).json({ message: "Invalid sale data" });
@@ -224,9 +252,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const itemData = insertRecoveryItemSchema.parse(req.body);
       const item = await storage.createRecoveryItem(itemData);
+      
+      // Automatically track recovery event
+      if (item.originalProductId) {
+        await storage.createProductDateEvent({
+          productId: item.originalProductId,
+          clientId: item.clientId || undefined,
+          eventType: EVENT_TYPES.RECOVERY_RECEIVED,
+          eventDate: item.recoveryDate,
+          notes: `Product received for recovery - ${item.brand} ${item.model}`,
+          createdAt: new Date().toISOString()
+        });
+      }
+      
       res.status(201).json(item);
     } catch (error) {
       res.status(400).json({ message: "Invalid recovery item data" });
+    }
+  });
+
+  // Product Date Events routes
+  app.get("/api/product-date-events", async (req, res) => {
+    try {
+      const events = await storage.getProductDateEvents();
+      res.json(events);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch date events" });
+    }
+  });
+
+  app.get("/api/product-date-events/product/:productId", async (req, res) => {
+    try {
+      const productId = parseInt(req.params.productId);
+      const events = await storage.getProductDateEventsByProduct(productId);
+      res.json(events);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch product date events" });
+    }
+  });
+
+  app.post("/api/product-date-events", async (req, res) => {
+    try {
+      const eventData = insertProductDateEventSchema.parse(req.body);
+      const event = await storage.createProductDateEvent(eventData);
+      res.status(201).json(event);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid date event data" });
+    }
+  });
+
+  app.put("/api/product-date-events/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const eventData = insertProductDateEventSchema.partial().parse(req.body);
+      const event = await storage.updateProductDateEvent(id, eventData);
+      if (!event) {
+        return res.status(404).json({ message: "Date event not found" });
+      }
+      res.json(event);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid date event data" });
+    }
+  });
+
+  app.delete("/api/product-date-events/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteProductDateEvent(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Date event not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete date event" });
     }
   });
 
