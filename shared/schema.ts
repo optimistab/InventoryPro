@@ -61,6 +61,34 @@ export const clientRequirements = pgTable("client_requirements", {
   createdDate: text("created_date").notNull(),
 });
 
+// Product lifecycle date tracking
+export const productDateEvents = pgTable("product_date_events", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id").notNull(),
+  clientId: integer("client_id"), // optional, for customer-related events
+  eventType: text("event_type").notNull(), // see EVENT_TYPES constant below
+  eventDate: text("event_date").notNull(), // ISO date string
+  notes: text("notes"),
+  createdAt: text("created_at").notNull(),
+});
+
+// Event types for product lifecycle tracking
+export const EVENT_TYPES = {
+  PRODUCT_ADDED: "product_added",
+  FIRST_SALE: "first_sale_to_customer", 
+  RETURNED_FROM_CUSTOMER: "returned_from_customer",
+  REPAIR_STARTED: "repair_started",
+  REPAIR_COMPLETED: "repair_completed",
+  RESALE_TO_CUSTOMER: "resale_to_customer",
+  RECOVERY_RECEIVED: "recovery_received",
+  QUALITY_CHECK: "quality_check",
+  PRICE_UPDATED: "price_updated",
+  STOCK_UPDATED: "stock_updated",
+  CUSTOMER_COMPLAINT: "customer_complaint",
+  WARRANTY_CLAIM: "warranty_claim",
+  DISPOSED: "disposed"
+} as const;
+
 // Recovery information for refurbished items
 export const recoveryItems = pgTable("recovery_items", {
   id: serial("id").primaryKey(),
@@ -97,6 +125,10 @@ export const insertRecoveryItemSchema = createInsertSchema(recoveryItems).omit({
   id: true,
 });
 
+export const insertProductDateEventSchema = createInsertSchema(productDateEvents).omit({
+  id: true,
+});
+
 // Types
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
@@ -112,6 +144,9 @@ export type InsertClientRequirement = z.infer<typeof insertClientRequirementSche
 
 export type RecoveryItem = typeof recoveryItems.$inferSelect;
 export type InsertRecoveryItem = z.infer<typeof insertRecoveryItemSchema>;
+
+export type ProductDateEvent = typeof productDateEvents.$inferSelect;
+export type InsertProductDateEvent = z.infer<typeof insertProductDateEventSchema>;
 
 // Extended types for joins
 export type SaleWithDetails = Sale & {

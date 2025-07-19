@@ -3,7 +3,8 @@ import {
   Client, InsertClient, 
   Sale, InsertSale, SaleWithDetails,
   ClientRequirement, InsertClientRequirement,
-  RecoveryItem, InsertRecoveryItem
+  RecoveryItem, InsertRecoveryItem,
+  ProductDateEvent, InsertProductDateEvent
 } from "@shared/schema";
 
 export interface IStorage {
@@ -48,6 +49,14 @@ export interface IStorage {
   updateRecoveryItem(id: number, item: Partial<InsertRecoveryItem>): Promise<RecoveryItem | undefined>;
   deleteRecoveryItem(id: number): Promise<boolean>;
 
+  // Product Date Events
+  getProductDateEvents(): Promise<ProductDateEvent[]>;
+  getProductDateEventsByProduct(productId: number): Promise<ProductDateEvent[]>;
+  getProductDateEvent(id: number): Promise<ProductDateEvent | undefined>;
+  createProductDateEvent(event: InsertProductDateEvent): Promise<ProductDateEvent>;
+  updateProductDateEvent(id: number, event: Partial<InsertProductDateEvent>): Promise<ProductDateEvent | undefined>;
+  deleteProductDateEvent(id: number): Promise<boolean>;
+
   // Analytics
   getDashboardStats(): Promise<{
     totalInventory: number;
@@ -67,12 +76,14 @@ export class MemStorage implements IStorage {
   private sales: Map<number, Sale> = new Map();
   private clientRequirements: Map<number, ClientRequirement> = new Map();
   private recoveryItems: Map<number, RecoveryItem> = new Map();
+  private productDateEvents: Map<number, ProductDateEvent> = new Map();
   
   private currentProductId = 1;
   private currentClientId = 1;
   private currentSaleId = 1;
   private currentRequirementId = 1;
   private currentRecoveryId = 1;
+  private currentDateEventId = 1;
 
   constructor() {
     // Initialize with sample laptop and computer products
@@ -472,6 +483,46 @@ export class MemStorage implements IStorage {
 
   async deleteRecoveryItem(id: number): Promise<boolean> {
     return this.recoveryItems.delete(id);
+  }
+
+  // Product Date Events
+  async getProductDateEvents(): Promise<ProductDateEvent[]> {
+    return Array.from(this.productDateEvents.values());
+  }
+
+  async getProductDateEventsByProduct(productId: number): Promise<ProductDateEvent[]> {
+    return Array.from(this.productDateEvents.values()).filter(e => e.productId === productId);
+  }
+
+  async getProductDateEvent(id: number): Promise<ProductDateEvent | undefined> {
+    return this.productDateEvents.get(id);
+  }
+
+  async createProductDateEvent(insertEvent: InsertProductDateEvent): Promise<ProductDateEvent> {
+    const id = this.currentDateEventId++;
+    const now = new Date().toISOString();
+    const event: ProductDateEvent = { 
+      ...insertEvent, 
+      id,
+      clientId: insertEvent.clientId ?? null,
+      notes: insertEvent.notes ?? null,
+      createdAt: now
+    };
+    this.productDateEvents.set(id, event);
+    return event;
+  }
+
+  async updateProductDateEvent(id: number, eventUpdate: Partial<InsertProductDateEvent>): Promise<ProductDateEvent | undefined> {
+    const existing = this.productDateEvents.get(id);
+    if (!existing) return undefined;
+    
+    const updated: ProductDateEvent = { ...existing, ...eventUpdate };
+    this.productDateEvents.set(id, updated);
+    return updated;
+  }
+
+  async deleteProductDateEvent(id: number): Promise<boolean> {
+    return this.productDateEvents.delete(id);
   }
 
   // Analytics
