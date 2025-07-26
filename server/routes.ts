@@ -16,6 +16,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/products", async (req, res) => {
     try {
       const products = await storage.getProducts();
+      console.log("Fetched products:", products);
       res.json(products);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch products" });

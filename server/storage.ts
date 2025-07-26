@@ -6,6 +6,7 @@ import {
   RecoveryItem, InsertRecoveryItem,
   ProductDateEvent, InsertProductDateEvent
 } from "@shared/schema";
+import pool from "./../db";
 
 export interface IStorage {
   // Products
@@ -70,7 +71,7 @@ export interface IStorage {
   }>;
 }
 
-export class MemStorage implements IStorage {
+export class PostgresStorage implements IStorage {
   private products: Map<number, Product> = new Map();
   private clients: Map<number, Client> = new Map();
   private sales: Map<number, Sale> = new Map();
@@ -85,179 +86,27 @@ export class MemStorage implements IStorage {
   private currentRecoveryId = 1;
   private currentDateEventId = 1;
 
-  constructor() {
-    // Initialize with sample laptop and computer products
-    this.initializeSampleData();
-  }
-
-  private initializeSampleData() {
-    // Sample Laptops
-    const laptop1: Product = {
-      id: this.currentProductId++,
-      name: "MacBook Pro 16-inch",
-      description: "High-performance laptop for professionals with M3 Max chip",
-      sku: "MBA-16-M3-512",
-      brand: "Apple",
-      model: "MacBook Pro 16",
-      category: "laptop",
-      condition: "new",
-      price: "2499.00",
-      cost: "2100.00",
-      stockQuantity: 8,
-      specifications: "M3 Max chip, 16GB RAM, 512GB SSD, 16-inch Liquid Retina XDR display",
-      isActive: true
-    };
-
-    const laptop2: Product = {
-      id: this.currentProductId++,
-      name: "Dell XPS 13 Plus",
-      description: "Ultra-portable laptop with premium design",
-      sku: "DEL-XPS-13-512",
-      brand: "Dell",
-      model: "XPS 13 Plus",
-      category: "laptop",
-      condition: "new",
-      price: "1299.00",
-      cost: "950.00",
-      stockQuantity: 15,
-      specifications: "Intel Core i7-1260P, 16GB LPDDR5, 512GB SSD, 13.4-inch OLED display",
-      isActive: true
-    };
-
-    const laptop3: Product = {
-      id: this.currentProductId++,
-      name: "ThinkPad X1 Carbon",
-      description: "Business laptop with exceptional durability",
-      sku: "LEN-X1C-G11-256",
-      brand: "Lenovo",
-      model: "ThinkPad X1 Carbon Gen 11",
-      category: "laptop",
-      condition: "refurbished",
-      price: "999.00",
-      cost: "750.00",
-      stockQuantity: 3,
-      specifications: "Intel Core i5-1335U, 16GB RAM, 256GB SSD, 14-inch display",
-      isActive: true
-    };
-
-    // Sample Desktop Computers
-    const desktop1: Product = {
-      id: this.currentProductId++,
-      name: "iMac 24-inch",
-      description: "All-in-one desktop with stunning display",
-      sku: "APL-IMAC-24-512",
-      brand: "Apple",
-      model: "iMac 24",
-      category: "desktop",
-      condition: "new",
-      price: "1699.00",
-      cost: "1400.00",
-      stockQuantity: 5,
-      specifications: "M3 chip, 16GB RAM, 512GB SSD, 24-inch 4.5K Retina display",
-      isActive: true
-    };
-
-    const desktop2: Product = {
-      id: this.currentProductId++,
-      name: "HP Pavilion Desktop",
-      description: "Reliable desktop for everyday computing",
-      sku: "HP-PAV-DT-1TB",
-      brand: "HP",
-      model: "Pavilion Desktop TP01",
-      category: "desktop",
-      condition: "new",
-      price: "749.00",
-      cost: "580.00",
-      stockQuantity: 12,
-      specifications: "AMD Ryzen 5 5600G, 12GB RAM, 1TB HDD + 256GB SSD",
-      isActive: true
-    };
-
-    const laptop4: Product = {
-      id: this.currentProductId++,
-      name: "ASUS ROG Strix G15",
-      description: "Gaming laptop with high-performance graphics",
-      sku: "ASU-ROG-G15-1TB",
-      brand: "ASUS",
-      model: "ROG Strix G15",
-      category: "laptop",
-      condition: "new",
-      price: "1899.00",
-      cost: "1450.00",
-      stockQuantity: 0,
-      specifications: "AMD Ryzen 7 6800H, RTX 3070 Ti, 16GB RAM, 1TB SSD, 15.6-inch 165Hz display",
-      isActive: true
-    };
-
-    // Add products to storage
-    [laptop1, laptop2, laptop3, desktop1, desktop2, laptop4].forEach(product => {
-      this.products.set(product.id, product);
-    });
-
-    // Sample Clients
-    const client1: Client = {
-      id: this.currentClientId++,
-      name: "TechCorp Solutions",
-      email: "contact@techcorp.com",
-      phone: "(555) 123-4567",
-      address: "123 Business Ave",
-      city: "New York",
-      state: "NY",
-      zipCode: "10001",
-      company: "TechCorp Solutions Inc.",
-      isActive: true
-    };
-
-    const client2: Client = {
-      id: this.currentClientId++,
-      name: "Sarah Johnson",
-      email: "sarah.j@email.com",
-      phone: "(555) 987-6543",
-      address: "456 Residential St",
-      city: "Los Angeles", 
-      state: "CA",
-      zipCode: "90210",
-      company: null,
-      isActive: true
-    };
-
-    [client1, client2].forEach(client => {
-      this.clients.set(client.id, client);
-    });
-
-    // Sample Sales
-    const sale1: Sale = {
-      id: this.currentSaleId++,
-      clientId: 1,
-      productId: 1,
-      quantity: 1,
-      unitPrice: "2499.00",
-      totalAmount: "2499.00",
-      saleDate: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      status: "completed",
-      notes: "Corporate purchase for development team"
-    };
-
-    const sale2: Sale = {
-      id: this.currentSaleId++,
-      clientId: 2,
-      productId: 2,
-      quantity: 1,
-      unitPrice: "1299.00", 
-      totalAmount: "1299.00",
-      saleDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      status: "completed",
-      notes: null
-    };
-
-    [sale1, sale2].forEach(sale => {
-      this.sales.set(sale.id, sale);
-    });
-  }
 
   // Products
   async getProducts(): Promise<Product[]> {
-    return Array.from(this.products.values()).filter(p => p.isActive);
+    console.log("Fetching products from database...");
+    const res = await pool.query("SELECT * FROM products WHERE is_active = TRUE");
+    console.log("Fetched products from database:", res.rows);
+    return res.rows.map(row => ({
+      id: row.id,
+      brand: row.brand,
+      name: row.name,
+      sku: row.sku,
+      model: row.model,
+      category: row.category,
+      condition: row.condition,
+      price: row.price,
+      cost: row.cost,
+      stockQuantity: row.stock_quantity,
+      specifications: row.specifications,
+      description: row.description,
+      isActive: row.is_active
+    }));
   }
 
   async getProduct(id: number): Promise<Product | undefined> {
@@ -563,4 +412,4 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new PostgresStorage();
