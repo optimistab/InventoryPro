@@ -19,6 +19,7 @@ export default function Inventory() {
   const [conditionFilter, setConditionFilter] = useState<string>("all");
   const [stockFilter, setStockFilter] = useState<string>("all");
   const [deleteId, setDeleteId] = useState<number | 0>(0);
+  const [editProduct, setEditProduct] = useState<Product | null>(null);
   const queryClient = useQueryClient();
 
   const { data: products, isLoading } = useQuery<Product[]>({
@@ -287,7 +288,7 @@ export default function Inventory() {
                       </TableCell>
                       <TableCell>
                         <div className="flex space-x-1">
-                          <Button variant="ghost" size="sm">
+                          <Button variant="ghost" size="sm" onClick={() => setEditProduct(product)}>
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
@@ -310,14 +311,17 @@ export default function Inventory() {
       </div>
 
       {/* Add Product Dialog */}
-      <Dialog open={isProductFormOpen} onOpenChange={setIsProductFormOpen}>
+      <Dialog open={isProductFormOpen || !!editProduct} onOpenChange={() => { setIsProductFormOpen(false); setEditProduct(null); }}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
-            <DialogTitle>Add New Product</DialogTitle>
+            <DialogTitle>
+              {editProduct ? "Edit Product" : "Add New Product"}
+            </DialogTitle>
           </DialogHeader>
           <ProductForm
-            onSuccess={() => setIsProductFormOpen(false)}
-            onCancel={() => setIsProductFormOpen(false)}
+            product={editProduct || undefined}
+            onSuccess={() => { setIsProductFormOpen(false); setEditProduct(null); }}
+            onCancel={() => { setIsProductFormOpen(false); setEditProduct(null); }}
           />
         </DialogContent>
       </Dialog>

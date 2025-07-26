@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -9,14 +10,15 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import type { InsertProduct } from "@shared/schema";
+import type { InsertProduct, Product } from "@shared/schema";
 
 interface ProductFormProps {
+  product?: Product;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export default function ProductForm({ onSuccess, onCancel }: ProductFormProps) {
+export default function ProductForm({ product, onSuccess, onCancel }: ProductFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -38,6 +40,42 @@ export default function ProductForm({ onSuccess, onCancel }: ProductFormProps) {
     },
   });
 
+  // Prefill form when editing
+  useEffect(() => {
+    if (product) {
+      form.reset({
+        name: product.name,
+        sku: product.sku,
+        brand: product.brand,
+        model: product.model,
+        category: product.category,
+        condition: product.condition,
+        price: product.price,
+        cost: product.cost,
+        stockQuantity: product.stockQuantity,
+        specifications: product.specifications || "",
+        description: product.description || "",
+        isActive: product.isActive,
+      });
+    } else {
+      form.reset({
+        name: "",
+        sku: "",
+        brand: "",
+        model: "",
+        category: "laptop",
+        condition: "new",
+        price: "0",
+        cost: "0",
+        stockQuantity: 1,
+        specifications: "",
+        description: "",
+        isActive: true,
+      });
+    }
+  }, [product, form]);
+
+  // Create mutation
   const createProductMutation = useMutation({
     mutationFn: async (data: InsertProduct) => {
       const response = await apiRequest("POST", "/api/products", data);
@@ -61,9 +99,40 @@ export default function ProductForm({ onSuccess, onCancel }: ProductFormProps) {
     },
   });
 
+  // Update mutation
+  const updateProductMutation = useMutation({
+    mutationFn: async (data: InsertProduct) => {
+      if (!product) throw new Error("No product to update");
+      const response = await apiRequest("PUT", `/api/products/${product.id}`, data);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/products"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
+      toast({
+        title: "Success",
+        description: "Product updated successfully",
+      });
+      onSuccess();
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update product",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (data: InsertProduct) => {
-    createProductMutation.mutate(data);
+    if (product) {
+      updateProductMutation.mutate(data);
+    } else {
+      createProductMutation.mutate(data);
+    }
   };
+
+  const isLoading = createProductMutation.isPending || updateProductMutation.isPending;
 
   return (
     <Form {...form}>
@@ -135,7 +204,7 @@ export default function ProductForm({ onSuccess, onCancel }: ProductFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Category</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
@@ -157,7 +226,7 @@ export default function ProductForm({ onSuccess, onCancel }: ProductFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Condition</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select condition" />
@@ -264,8 +333,14 @@ export default function ProductForm({ onSuccess, onCancel }: ProductFormProps) {
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="submit" disabled={createProductMutation.isPending}>
-            {createProductMutation.isPending ? "Creating..." : "Create Product"}
+          <Button type="submit" disabled={isLoading}>
+            {isLoading
+              ? product
+                ? "Saving..."
+                : "Creating..."
+              : product
+                ? "Save Changes"
+                : "Create Product"}
           </Button>
         </div>
       </form>
