@@ -16,7 +16,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/products", async (req, res) => {
     try {
       const products = await storage.getProducts();
-      console.log("Fetched products:", products);
       res.json(products);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch products" });
@@ -50,10 +49,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: `Product ${product.name} added to inventory`,
         createdAt: new Date().toISOString()
       });
-      console.log("Product date event created");
 
-      console.log("RES -- ",res)
-      
       res.status(201).json(product);
     } catch (error) {
       res.status(400).json({ message: "Invalid product data" });

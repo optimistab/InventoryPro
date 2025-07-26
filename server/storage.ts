@@ -151,7 +151,6 @@ export class PostgresStorage implements IStorage {
 
   async createProduct(product: InsertProduct): Promise<Product> {
 
-    console.log("Creating product: -- ", product);
     const res = await pool.query(
       `INSERT INTO products 
         (brand, name, sku, model, category, condition, price, cost, stock_quantity, specifications, description, is_active)
