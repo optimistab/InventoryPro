@@ -89,7 +89,9 @@ export class PostgresStorage implements IStorage {
 
   // Products
   async getProducts(): Promise<Product[]> {
+    console.log("STORAGE ts Fetching products from database...", process.env.DATABASE_URL);
     const res = await pool.query("SELECT * FROM products WHERE is_active = TRUE");
+    console.log("STORAGE ts Products fetched successfully:", res);
     return res.rows.map(row => ({
       id: row.id,
       brand: row.brand,

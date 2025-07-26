@@ -15,7 +15,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Products routes
   app.get("/api/products", async (req, res) => {
     try {
+      console.log("Fetching products...");
       const products = await storage.getProducts();
+      console.log("Products fetched successfully:", products);
       res.json(products);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch products" });
@@ -37,8 +39,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/products", async (req, res) => {
     try {
+      console.log("Adding new product with data:", req.body);
       const productData = insertProductSchema.parse(req.body);
+      console.log("Parsed product data:", productData);
       const product = await storage.createProduct(productData);
+      console.log("Product created successfully:", product);
 
       
       // Automatically track product addition date
@@ -49,10 +54,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: `Product ${product.name} added to inventory`,
         createdAt: new Date().toISOString()
       });
+      console.log("Product date event created successfully");
 
       res.status(201).json(product);
     } catch (error) {
-      res.status(400).json({ message: "Invalid product data" });
+      res.status(400).json({ message: "POST Invalid product data" });
     }
   });
 
@@ -66,7 +72,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       res.json(product);
     } catch (error) {
-      res.status(400).json({ message: "Invalid product data" });
+      res.status(400).json({ message: " PUT Invalid product data" });
     }
   });
 
