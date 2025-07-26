@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -13,11 +13,13 @@ import Predictions from "@/pages/predictions";
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
 import { useState } from "react";
+import Home from "./pages/home";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
+      <Route path="/" component={Home} />
+      <Route path="/home" component={Home} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/inventory" component={Inventory} />
       <Route path="/sales" component={Sales} />
@@ -26,8 +28,7 @@ function Router() {
       <Route path="/predictions" component={Predictions} />
       <Route component={NotFound} />
     </Switch>
-  );
-}
+  );}
 
 function AppLayout() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -45,10 +46,24 @@ function AppLayout() {
         </main>
       </div>
     </div>
-  );
-}
+  );}
 
 function App() {
+  const [location] = useLocation();
+
+  // Show Home (login) without sidebar for "/" and "/home"
+  if (location === "/" || location === "/home") {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <Home />
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
+  // All other routes use AppLayout (with sidebar)
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

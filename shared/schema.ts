@@ -104,6 +104,15 @@ export const recoveryItems = pgTable("recovery_items", {
   notes: text("notes"),
 });
 
+// Users table
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull().unique(),
+  password: text("password").notNull(),
+  role: text("role").notNull(), // e.g., "admin", "manager", "staff"
+  dateOfCreation: text("date_of_creation").notNull(), // ISO date string
+});
+
 // Insert schemas
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
@@ -129,6 +138,10 @@ export const insertProductDateEventSchema = createInsertSchema(productDateEvents
   id: true,
 });
 
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+});
+
 // Types
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
@@ -147,6 +160,9 @@ export type InsertRecoveryItem = z.infer<typeof insertRecoveryItemSchema>;
 
 export type ProductDateEvent = typeof productDateEvents.$inferSelect;
 export type InsertProductDateEvent = z.infer<typeof insertProductDateEventSchema>;
+
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
 
 // Extended types for joins
 export type SaleWithDetails = Sale & {

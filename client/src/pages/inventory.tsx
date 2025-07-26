@@ -29,7 +29,6 @@ export default function Inventory() {
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
       const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
-      console.log("Delete response: ", res);
       if (!res.ok) throw new Error("Failed to delete product");
     },
     onSuccess: () => {

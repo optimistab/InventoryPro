@@ -10,14 +10,13 @@ import {
   insertProductDateEventSchema,
   EVENT_TYPES
 } from "@shared/schema";
+import passport from "passport";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Products routes
   app.get("/api/products", async (req, res) => {
     try {
-      console.log("Fetching products...");
       const products = await storage.getProducts();
-      console.log("Products fetched successfully:", products);
       res.json(products);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch products" });
@@ -39,11 +38,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/products", async (req, res) => {
     try {
-      console.log("Adding new product with data:", req.body);
       const productData = insertProductSchema.parse(req.body);
-      console.log("Parsed product data:", productData);
       const product = await storage.createProduct(productData);
-      console.log("Product created successfully:", product);
 
       
       // Automatically track product addition date
@@ -342,6 +338,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(stats);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch dashboard stats" });
+    }
+  });
+
+  // Auth routes
+  // Login
+  app.post("/api/login", passport.authenticate("local"), (req, res) => {
+    res.json({ message: "Logged in", user: req.user });
+  });
+
+  // Logout
+  app.post("/api/logout", (req, res) => {
+    req.logout((err) => {
+      if (err) return res.status(500).json({ error: "Logout failed" });
+      res.json({ message: "Logged out" });
+    });
+  });
+
+  // Check auth
+  app.get("/api/me", (req, res) => {
+    if (req.isAuthenticated()) {
+      res.json({ user: req.user });
+    } else {
+      res.status(401).json({ error: "Not authenticated" });
     }
   });
 
