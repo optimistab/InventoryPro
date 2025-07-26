@@ -72,26 +72,24 @@ export interface IStorage {
 }
 
 export class PostgresStorage implements IStorage {
-  private products: Map<number, Product> = new Map();
-  private clients: Map<number, Client> = new Map();
-  private sales: Map<number, Sale> = new Map();
-  private clientRequirements: Map<number, ClientRequirement> = new Map();
-  private recoveryItems: Map<number, RecoveryItem> = new Map();
-  private productDateEvents: Map<number, ProductDateEvent> = new Map();
-  
-  private currentProductId = 1;
+
+  private clients = new Map<number, Client>();
+  private products = new Map<number, Product>();
+  private sales = new Map<number, Sale>();
+  private clientRequirements = new Map<number, ClientRequirement>();
+  private recoveryItems = new Map<number, RecoveryItem>();
+  private productDateEvents = new Map<number, ProductDateEvent>();
+
   private currentClientId = 1;
+  private currentProductId = 1;
   private currentSaleId = 1;
   private currentRequirementId = 1;
   private currentRecoveryId = 1;
   private currentDateEventId = 1;
 
-
   // Products
   async getProducts(): Promise<Product[]> {
-    console.log("Fetching products from database...");
     const res = await pool.query("SELECT * FROM products WHERE is_active = TRUE");
-    console.log("Fetched products from database:", res.rows);
     return res.rows.map(row => ({
       id: row.id,
       brand: row.brand,
@@ -110,38 +108,134 @@ export class PostgresStorage implements IStorage {
   }
 
   async getProduct(id: number): Promise<Product | undefined> {
-    return this.products.get(id);
+    const res = await pool.query("SELECT * FROM products WHERE id = $1", [id]);
+    if (res.rows.length === 0) return undefined;
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      brand: row.brand,
+      name: row.name,
+      sku: row.sku,
+      model: row.model,
+      category: row.category,
+      condition: row.condition,
+      price: row.price,
+      cost: row.cost,
+      stockQuantity: row.stock_quantity,
+      specifications: row.specifications,
+      description: row.description,
+      isActive: row.is_active
+    };
   }
 
   async getProductBySku(sku: string): Promise<Product | undefined> {
-    return Array.from(this.products.values()).find(p => p.sku === sku);
-  }
-
-  async createProduct(insertProduct: InsertProduct): Promise<Product> {
-    const id = this.currentProductId++;
-    const product: Product = { 
-      ...insertProduct, 
-      id,
-      description: insertProduct.description ?? null,
-      specifications: insertProduct.specifications ?? null,
-      stockQuantity: insertProduct.stockQuantity ?? 0,
-      isActive: insertProduct.isActive ?? true
+    const res = await pool.query("SELECT * FROM products WHERE sku = $1", [sku]);
+    if (res.rows.length === 0) return undefined;
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      brand: row.brand,
+      name: row.name,
+      sku: row.sku,
+      model: row.model,
+      category: row.category,
+      condition: row.condition,
+      price: row.price,
+      cost: row.cost,
+      stockQuantity: row.stock_quantity,
+      specifications: row.specifications,
+      description: row.description,
+      isActive: row.is_active
     };
-    this.products.set(id, product);
-    return product;
   }
 
-  async updateProduct(id: number, productUpdate: Partial<InsertProduct>): Promise<Product | undefined> {
-    const existing = this.products.get(id);
-    if (!existing) return undefined;
-    
-    const updated: Product = { ...existing, ...productUpdate };
-    this.products.set(id, updated);
-    return updated;
+  async createProduct(product: InsertProduct): Promise<Product> {
+
+    console.log("Creating product: -- ", product);
+    const res = await pool.query(
+      `INSERT INTO products 
+        (brand, name, sku, model, category, condition, price, cost, stock_quantity, specifications, description, is_active)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+       RETURNING *`,
+      [
+        product.brand,
+        product.name,
+        product.sku,
+        product.model,
+        product.category,
+        product.condition,
+        (product.price),
+        (product.cost),
+        product.stockQuantity ?? 0,
+        product.specifications ?? null,
+        product.description ?? null,
+        product.isActive ?? true
+      ]
+    );
+ 
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      brand: row.brand,
+      name: row.name,
+      sku: row.sku,
+      model: row.model,
+      category: row.category,
+      condition: row.condition,
+      price: row.price,
+      cost: row.cost,
+      stockQuantity: row.stock_quantity,
+      specifications: row.specifications,
+      description: row.description,
+      isActive: row.is_active
+    };
+  }
+
+  async updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product | undefined> {
+    // Build dynamic SET clause
+    const fields = [];
+    const values = [];
+    let idx = 1;
+    for (const [key, value] of Object.entries(product)) {
+      if (key === "stockQuantity") {
+        fields.push(`stock_quantity = $${idx++}`);
+        values.push(value);
+      } else if (key === "isActive") {
+        fields.push(`is_active = $${idx++}`);
+        values.push(value);
+      } else {
+        fields.push(`${key} = $${idx++}`);
+        values.push(value);
+      }
+    }
+    if (fields.length === 0) return this.getProduct(id);
+    values.push(id);
+    const sql = `UPDATE products SET ${fields.join(", ")} WHERE id = $${values.length} RETURNING *`;
+    const res = await pool.query(sql, values);
+    if (res.rows.length === 0) return undefined;
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      brand: row.brand,
+      name: row.name,
+      sku: row.sku,
+      model: row.model,
+      category: row.category,
+      condition: row.condition,
+      price: row.price,
+      cost: row.cost,
+      stockQuantity: row.stock_quantity,
+      specifications: row.specifications,
+      description: row.description,
+      isActive: row.is_active
+    };
   }
 
   async deleteProduct(id: number): Promise<boolean> {
-    return this.products.delete(id);
+    console.log(`Deleting product with ID: ${id}`);
+    const res = await pool.query("DELETE FROM products WHERE id = $1", [id]);
+    console.log(`Delete result: ${res}`);
+    return res.rowCount > 0;
   }
 
   // Clients

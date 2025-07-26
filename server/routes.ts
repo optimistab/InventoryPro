@@ -40,6 +40,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const productData = insertProductSchema.parse(req.body);
       const product = await storage.createProduct(productData);
+
       
       // Automatically track product addition date
       await storage.createProductDateEvent({
@@ -49,6 +50,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         notes: `Product ${product.name} added to inventory`,
         createdAt: new Date().toISOString()
       });
+      console.log("Product date event created");
+
+      console.log("RES -- ",res)
       
       res.status(201).json(product);
     } catch (error) {
