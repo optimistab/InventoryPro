@@ -386,17 +386,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await pool.query('SELECT NOW()');
       console.log("✅ Database connection successful");
 
-      // Check if users table exists
+      // Check if users table exists - use a safer approach
       console.log("🔍 Checking database schema...");
-      const tableExists = await pool.query(`
-        SELECT EXISTS (
-          SELECT FROM information_schema.tables 
-          WHERE table_schema = 'public' 
-          AND table_name = 'users'
-        );
-      `);
+      let tableExists = false;
+      try {
+        const tableCheck = await pool.query(`
+          SELECT EXISTS (
+            SELECT FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name = 'users'
+          );
+        `);
+        tableExists = tableCheck.rows[0].exists;
+      } catch (error) {
+        console.log("⚠️  Could not check if users table exists, assuming it doesn't");
+        tableExists = false;
+      }
 
-      if (!tableExists.rows[0].exists) {
+      if (!tableExists) {
         console.log("❌ Users table does not exist");
         console.log("🔄 Creating database schema...");
         
@@ -424,15 +431,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("✅ Database schema exists");
       }
 
-      // Check if users table has the is_active column
-      const columnCheck = await pool.query(`
-        SELECT column_name 
-        FROM information_schema.columns 
-        WHERE table_name = 'users' AND column_name = 'is_active'
-      `);
+      // Always try to ensure schema is up to date
+      console.log("🔄 Ensuring schema is up to date...");
+      try {
+        const { execSync } = await import('child_process');
+        execSync('npm run db:push', { stdio: 'inherit' });
+        console.log("✅ Schema is up to date");
+      } catch (error) {
+        console.log("⚠️  Schema push failed, continuing with existing schema");
+      }
 
-      if (columnCheck.rows.length === 0) {
-        console.log("❌ Users table missing 'is_active' column");
+      // Check if users table has the is_active column
+      let hasIsActiveColumn = false;
+      try {
+        const columnCheck = await pool.query(`
+          SELECT column_name 
+          FROM information_schema.columns 
+          WHERE table_name = 'users' AND column_name = 'is_active'
+        `);
+        hasIsActiveColumn = columnCheck.rows.length > 0;
+      } catch (error) {
+        console.log("⚠️  Could not check column structure, assuming schema needs update");
+        hasIsActiveColumn = false;
+      }
+
+      if (!hasIsActiveColumn) {
+        console.log("❌ Users table missing 'is_active' column or table doesn't exist");
         console.log("🔄 Updating schema...");
         try {
           const { execSync } = await import('child_process');
@@ -447,8 +471,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log("✅ Database schema is up to date");
 
       // Check if users already exist
-      const existingUsers = await pool.query('SELECT COUNT(*) FROM users');
-      const userCount = parseInt(existingUsers.rows[0].count);
+      let userCount = 0;
+      try {
+        const existingUsers = await pool.query('SELECT COUNT(*) FROM users');
+        userCount = parseInt(existingUsers.rows[0].count);
+      } catch (error) {
+        console.log("⚠️  Could not check existing users, assuming none exist");
+        userCount = 0;
+      }
 
       if (userCount > 0) {
         console.log(`📋 Found ${userCount} existing users`);
@@ -544,6 +574,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("❌ Production setup failed:", error);
       res.status(500).json({ 
         error: "Production setup failed", 
+        message: error instanceof Error ? error.message : "Unknown error"
+      });
+    }
+  });
+
+  // Simple schema creation endpoint
+  app.post("/api/init-db", async (req, res) => {
+    try {
+      console.log("🚀 Database initialization initiated...");
+
+      // Check if we're in production
+      if (process.env.NODE_ENV !== 'production') {
+        return res.status(400).json({ 
+          error: "Init endpoint only available in production",
+          message: "This endpoint is designed for production use only"
+        });
+      }
+
+      console.log("📡 Testing database connection...");
+      await pool.query('SELECT NOW()');
+      console.log("✅ Database connection successful");
+
+      console.log("🔄 Creating database schema...");
+      const { execSync } = await import('child_process');
+      
+      try {
+        execSync('npm run db:push', { stdio: 'inherit' });
+        console.log("✅ Database schema created successfully");
+        
+        res.json({
+          success: true,
+          message: "Database schema created successfully!",
+          nextStep: "Call /api/setup to create users"
+        });
+      } catch (error) {
+        console.error("❌ Failed to create database schema");
+        res.status(500).json({ 
+          error: "Failed to create database schema",
+          message: "Please ensure your DATABASE_URL is correct and the database is accessible"
+        });
+      }
+
+    } catch (error) {
+      console.error("❌ Database initialization failed:", error);
+      res.status(500).json({ 
+        error: "Database initialization failed", 
         message: error instanceof Error ? error.message : "Unknown error"
       });
     }
