@@ -12,7 +12,9 @@
     "create-users": "tsx scripts/createUsers.ts",
     "restrict-users": "tsx scripts/restrictUsers.ts",
     "check-users": "tsx scripts/checkUsers.ts",
-    "setup-production": "NODE_ENV=production tsx scripts/setupProduction.ts"
+    "setup-production": "NODE_ENV=production tsx scripts/setupProduction.ts",
+    "db:setup": "tsx scripts/setupDatabase.ts",
+    "deploy": "tsx scripts/deploy.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

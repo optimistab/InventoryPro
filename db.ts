@@ -1,9 +1,15 @@
 import { Pool } from "pg";
+import dotenv from "dotenv";
+
+// Load environment variables at the very beginning
+dotenv.config();
 
 // Fallback database configurations
 const getDatabaseConfig = () => {
   // Primary: Use DATABASE_URL from environment variables
+  console.log('process.env.DATABASE_URL --', process.env.DATABASE_URL);
   if (process.env.DATABASE_URL) {
+    console.log('DATABASE_URL --', process.env.DATABASE_URL);
     return {
       connectionString: process.env.DATABASE_URL,
       ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : 

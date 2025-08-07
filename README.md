@@ -18,13 +18,7 @@ A secure inventory tracking system designed for managing laptops, computers, and
 - **Session Management**: Secure session handling with Passport.js
 - **Database Security**: PostgreSQL with SSL connections in production
 
-## 👥 Authorized Users
 
-| Username | Password | Role    | Permissions |
-|----------|----------|---------|-------------|
-| admin    | admin123 | Admin   | Full access to all features |
-| manager  | manager123 | Manager | Manage inventory and sales |
-| staff    | staff123 | Staff   | View and update inventory |
 
 ## 🛠️ Local Development
 

@@ -2,6 +2,8 @@ import { defineConfig } from "drizzle-kit";
 
 if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL, ensure the database is provisioned");
+}else {
+  console.log('DATABASE_URL in drizzle.config.ts --', process.env.DATABASE_URL);
 }
 
 export default defineConfig({

@@ -6,8 +6,7 @@ import pgSession from "connect-pg-simple";
 import pool from "../db"; // your pg Pool
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import dotenv from "dotenv";
-dotenv.config();
+import setupDatabase from "../scripts/setupDatabase";
 
 const app = express();
 const PgSession = pgSession(session);
@@ -64,6 +63,14 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Set up database before starting the server
+  try {
+    await setupDatabase();
+    log('✅ Database setup completed');
+  } catch (error) {
+    log('⚠️  Database setup failed, but continuing...');
+  }
+  
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
