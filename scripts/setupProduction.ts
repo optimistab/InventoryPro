@@ -1,5 +1,7 @@
 import pool from "../db";
 import bcrypt from "bcrypt";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
 
 async function setupProduction() {
   try {
@@ -17,18 +19,60 @@ async function setupProduction() {
     await pool.query('SELECT NOW()');
     console.log("✅ Database connection successful");
 
-    // Check if users table exists and has the is_active column
+    // Check if users table exists
     console.log("🔍 Checking database schema...");
-    const tableCheck = await pool.query(`
+    const tableExists = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables 
+        WHERE table_schema = 'public' 
+        AND table_name = 'users'
+      );
+    `);
+
+    if (!tableExists.rows[0].exists) {
+      console.log("❌ Users table does not exist");
+      console.log("🔄 Creating database schema...");
+      
+      try {
+        // Create drizzle instance and run migrations
+        const db = drizzle(pool);
+        await migrate(db, { migrationsFolder: "./migrations" });
+        console.log("✅ Database schema created successfully");
+      } catch (migrationError) {
+        console.log("⚠️  Migration failed, trying schema push...");
+        // Fallback: try to push schema directly
+        const { execSync } = await import('child_process');
+        try {
+          execSync('npm run db:push', { stdio: 'inherit' });
+          console.log("✅ Database schema pushed successfully");
+        } catch (pushError) {
+          console.error("❌ Failed to create database schema");
+          console.error("   Please ensure your DATABASE_URL is correct and the database is accessible");
+          process.exit(1);
+        }
+      }
+    } else {
+      console.log("✅ Database schema exists");
+    }
+
+    // Check if users table has the is_active column
+    const columnCheck = await pool.query(`
       SELECT column_name 
       FROM information_schema.columns 
       WHERE table_name = 'users' AND column_name = 'is_active'
     `);
 
-    if (tableCheck.rows.length === 0) {
+    if (columnCheck.rows.length === 0) {
       console.log("❌ Users table missing 'is_active' column");
-      console.log("   Please run 'npm run db:push' first");
-      process.exit(1);
+      console.log("🔄 Updating schema...");
+      try {
+        const { execSync } = await import('child_process');
+        execSync('npm run db:push', { stdio: 'inherit' });
+        console.log("✅ Schema updated successfully");
+      } catch (error) {
+        console.error("❌ Failed to update schema");
+        process.exit(1);
+      }
     }
 
     console.log("✅ Database schema is up to date");
