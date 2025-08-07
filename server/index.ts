@@ -6,7 +6,7 @@ import pgSession from "connect-pg-simple";
 import pool from "../db"; // your pg Pool
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import setupDatabase from "../scripts/setupDatabase";
+import setupDatabaseDrizzle from "../scripts/setupDatabaseDrizzle";
 
 const app = express();
 const PgSession = pgSession(session);
@@ -63,10 +63,10 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Set up database before starting the server
+  // Set up database with Drizzle migrations before starting the server
   try {
-    await setupDatabase();
-    log('✅ Database setup completed');
+    await setupDatabaseDrizzle();
+    log('✅ Database setup with Drizzle migrations completed');
   } catch (error) {
     log('⚠️  Database setup failed, but continuing...');
   }

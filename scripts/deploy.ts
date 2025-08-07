@@ -8,9 +8,9 @@ async function deploy() {
   console.log('🚀 Starting deployment process...');
   
   try {
-    // Step 1: Set up database
-    console.log('📦 Step 1: Setting up database...');
-    execSync('npm run db:setup', { stdio: 'inherit' });
+    // Step 1: Set up database with Drizzle migrations
+    console.log('📦 Step 1: Setting up database with Drizzle migrations...');
+    execSync('npm run db:migrate', { stdio: 'inherit' });
     
     // Step 2: Build the application (for production)
     if (process.env.NODE_ENV === 'production') {

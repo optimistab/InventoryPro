@@ -8,6 +8,13 @@
       "when": 1754536852058,
       "tag": "0000_outstanding_lilandra",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1754536852058,
+      "tag": "0001_add_missing_tables",
+      "breakpoints": true
     }
   ]
 }
