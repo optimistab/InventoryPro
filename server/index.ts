@@ -65,13 +65,18 @@ app.use((req, res, next) => {
 (async () => {
   // Set up database with Drizzle migrations before starting the server
   try {
+    console.log(" setupDatabaseDrizzle START --")
     await setupDatabaseDrizzle();
+    console.log(" setupDatabaseDrizzle END --")
     log('✅ Database setup with Drizzle migrations completed');
   } catch (error) {
+    console.error('❌ Database setup with Drizzle migrations failed:', error);
     log('⚠️  Database setup failed, but continuing...');
   }
   
+  console.log("Registering routes...");
   const server = await registerRoutes(app);
+  console.log("Routes registered successfully.");
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
