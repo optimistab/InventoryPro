@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route, useLocation, useRoute } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -12,14 +12,13 @@ import Recovery from "@/pages/recovery";
 import Predictions from "@/pages/predictions";
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
-import { useState } from "react";
-import Home from "./pages/home";
+import { useState, useEffect } from "react";
+import LoginForm from "@/components/auth/login-form";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/home" component={Home} />
+      <Route path="/" component={Dashboard} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/inventory" component={Inventory} />
       <Route path="/sales" component={Sales} />
@@ -28,7 +27,8 @@ function Router() {
       <Route path="/predictions" component={Predictions} />
       <Route component={NotFound} />
     </Switch>
-  );}
+  );
+}
 
 function AppLayout() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -46,24 +46,76 @@ function AppLayout() {
         </main>
       </div>
     </div>
-  );}
+  );
+}
 
 function App() {
-  const [location] = useLocation();
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [, setLocation] = useLocation();
 
-  // Show Home (login) without sidebar for "/" and "/home"
-  if (location === "/" || location === "/home") {
+  // Check if user is already authenticated
+  useEffect(() => {
+    const checkAuth = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch("/api/me", { credentials: "include" });
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
+        } else {
+          setUser(null);
+        }
+      } catch {
+        setUser(null);
+      }
+      setLoading(false);
+    };
+    checkAuth();
+  }, []);
+
+  // Handle successful login
+  const handleLoginSuccess = (userData: any) => {
+    setUser(userData);
+    setLocation("/dashboard");
+  };
+
+  // Handle logout
+  const handleLogout = async () => {
+    await fetch("/api/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+    setUser(null);
+    setLocation("/");
+  };
+
+  if (loading) {
     return (
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <Toaster />
-          <Home />
+          <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
         </TooltipProvider>
       </QueryClientProvider>
     );
   }
 
-  // All other routes use AppLayout (with sidebar)
+  // Show login form if not authenticated
+  if (!user) {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <Toaster />
+          <LoginForm onLoginSuccess={handleLoginSuccess} />
+        </TooltipProvider>
+      </QueryClientProvider>
+    );
+  }
+
+  // All authenticated routes use AppLayout (with sidebar)
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

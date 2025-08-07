@@ -8,13 +8,13 @@ import { users } from "../shared/schema";
 passport.use(
   new LocalStrategy(async (username, password, done) => {
     try {
-      // Query user by username
+      // Query user by username and check if active
       const res = await pool.query(
-        `SELECT * FROM users WHERE username = $1`,
+        `SELECT * FROM users WHERE username = $1 AND is_active = true`,
         [username]
       );
       const user = res.rows[0];
-      if (!user) return done(null, false, { message: "User not found" });
+      if (!user) return done(null, false, { message: "User not found or inactive" });
 
       const match = await bcrypt.compare(password, user.password);
       if (!match) return done(null, false, { message: "Incorrect password" });

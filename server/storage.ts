@@ -236,7 +236,7 @@ export class PostgresStorage implements IStorage {
     console.log(`Deleting product with ID: ${id}`);
     const res = await pool.query("DELETE FROM products WHERE id = $1", [id]);
     console.log(`Delete result: ${res}`);
-    return res.rowCount > 0;
+    return (res.rowCount ?? 0) > 0;
   }
 
   // Clients

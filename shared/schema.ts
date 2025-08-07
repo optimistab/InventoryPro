@@ -2,6 +2,13 @@ import { pgTable, text, serial, integer, boolean, decimal, timestamp } from "dri
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Session table for connect-pg-simple
+export const sessions = pgTable("session", {
+  sid: text("sid").primaryKey(),
+  sess: text("sess").notNull(),
+  expire: timestamp("expire").notNull(),
+});
+
 // Products table - laptops and computers
 export const products = pgTable("products", {
   id: serial("id").primaryKey(),
@@ -111,6 +118,7 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   role: text("role").notNull(), // e.g., "admin", "manager", "staff"
   dateOfCreation: text("date_of_creation").notNull(), // ISO date string
+  isActive: boolean("is_active").notNull().default(true), // Only active users can login
 });
 
 // Insert schemas

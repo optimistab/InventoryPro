@@ -10,7 +10,8 @@ import {
   FileText,
   Laptop,
   User,
-  X
+  X,
+  LogOut
 } from "lucide-react";
 
 interface SidebarProps {
@@ -19,7 +20,7 @@ interface SidebarProps {
 }
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: BarChart3 },
+  { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
   { name: "Inventory", href: "/inventory", icon: Package },
   { name: "Sales", href: "/sales", icon: ShoppingCart },
   { name: "Clients", href: "/clients", icon: Users },
@@ -30,6 +31,14 @@ const navigation = [
 
 export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
   const [location] = useLocation();
+
+  const handleLogout = async () => {
+    await fetch("/api/logout", {
+      method: "POST",
+      credentials: "include",
+    });
+    window.location.href = "/";
+  };
 
   const SidebarContent = () => (
     <>
@@ -48,7 +57,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
       <nav className="mt-6 flex-1">
         {navigation.map((item) => {
           const Icon = item.icon;
-          const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
+          const isActive = location === item.href || (item.href !== "/dashboard" && location.startsWith(item.href));
           
           return (
             <Link key={item.name} href={item.href}>
@@ -68,7 +77,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
       </nav>
       
       <div className="p-6">
-        <div className="bg-slate-800 rounded-lg p-4">
+        <div className="bg-slate-800 rounded-lg p-4 mb-4">
           <div className="flex items-center space-x-3">
             <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
               <User className="text-sm text-white" />
@@ -79,6 +88,14 @@ export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
             </div>
           </div>
         </div>
+        
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center px-4 py-2 text-gray-300 hover:bg-slate-800 hover:text-white transition-colors rounded-lg"
+        >
+          <LogOut className="mr-3 h-4 w-4" />
+          Logout
+        </button>
       </div>
     </>
   );
@@ -121,7 +138,7 @@ export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
             <nav className="mt-6 flex-1">
               {navigation.map((item) => {
                 const Icon = item.icon;
-                const isActive = location === item.href || (item.href !== "/" && location.startsWith(item.href));
+                const isActive = location === item.href || (item.href !== "/dashboard" && location.startsWith(item.href));
                 
                 return (
                   <Link key={item.name} href={item.href}>
@@ -139,6 +156,28 @@ export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {
                 );
               })}
             </nav>
+            
+            <div className="p-6">
+              <div className="bg-slate-800 rounded-lg p-4 mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center">
+                    <User className="text-sm text-white" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm text-white">John Manager</p>
+                    <p className="text-gray-400 text-xs">Administrator</p>
+                  </div>
+                </div>
+              </div>
+              
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center px-4 py-2 text-gray-300 hover:bg-slate-800 hover:text-white transition-colors rounded-lg"
+              >
+                <LogOut className="mr-3 h-4 w-4" />
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       )}
