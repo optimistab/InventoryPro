@@ -7,6 +7,10 @@ dotenv.config();
 
 // we are at the cafe Haven
 
+// i have a nice diary
+
+
+
 // Fallback database configurations
 const getDatabaseConfig = () => {
   // Primary: Use DATABASE_URL from environment variables
