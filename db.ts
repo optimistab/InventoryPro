@@ -7,7 +7,7 @@ dotenv.config();
 
 // we are at the cafe Haven
 
-// i have a nice diary
+// i have a nice diary.
 
 
 
