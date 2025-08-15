@@ -2,7 +2,14 @@ import { Pool } from "pg";
 import dotenv from "dotenv";
 
 // Load environment variables at the very beginning
+
 dotenv.config();
+
+// we are at the cafe Haven
+
+// i have a nice diary.
+
+
 
 // Fallback database configurations
 const getDatabaseConfig = () => {
