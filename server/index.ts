@@ -12,6 +12,8 @@ import { createUsersIfNeeded } from "../scripts/createUsers";
 const app = express();
 const PgSession = pgSession(session);
 
+
+
 app.use(
   session({
     store: new PgSession({
