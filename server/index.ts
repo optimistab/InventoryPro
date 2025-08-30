@@ -78,14 +78,17 @@ app.use((req, res, next) => {
   }
 
   // Create users automatically if they don't exist (for first deployment)
-  try {
-    console.log("👥 Checking and creating users if needed...");
-    await createUsersIfNeeded();
-    log('✅ User setup completed');
-  } catch (error) {
-    console.error('❌ User setup failed:', error);
-    log('⚠️  User setup failed, but continuing...');
-  }
+  // Add a small delay to ensure database schema is fully ready
+  setTimeout(async () => {
+    try {
+      console.log("👥 Checking and creating users if needed...");
+      await createUsersIfNeeded();
+      log('✅ User setup completed');
+    } catch (error) {
+      console.error('❌ User setup failed:', error);
+      log('⚠️  User setup failed, but continuing...');
+    }
+  }, 2000); // 2 second delay to ensure schema is ready
   
   console.log("Registering routes...");
   const server = await registerRoutes(app);

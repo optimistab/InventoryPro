@@ -85,7 +85,21 @@ async function createUsers() {
 // Export a function for automatic user creation during deployment
 export async function createUsersIfNeeded() {
   try {
-    console.log("🔍 Checking if users exist...");
+    console.log("🔍 Checking if users table exists and if users exist...");
+
+    // First check if users table exists
+    const tableCheck = await pool.query(`
+      SELECT EXISTS (
+        SELECT FROM information_schema.tables
+        WHERE table_schema = 'public'
+        AND table_name = 'users'
+      )
+    `);
+
+    if (!tableCheck.rows[0].exists) {
+      console.log("⚠️  Users table doesn't exist yet. Skipping user creation for now.");
+      return;
+    }
 
     // Check if any users exist
     const userCheck = await pool.query("SELECT COUNT(*) as count FROM users");
