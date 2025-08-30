@@ -162,4 +162,4 @@ export async function createUsersIfNeeded() {
   }
 }
 
-createUsers();
+// Removed createUsers() call - now using createUsersIfNeeded() from server startup
