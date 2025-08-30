@@ -14,6 +14,8 @@ const PgSession = pgSession(session);
 
 
 
+// database issue resolves completely on render.com
+
 app.use(
   session({
     store: new PgSession({
