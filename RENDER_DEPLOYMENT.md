@@ -1,6 +1,6 @@
 # Render Deployment Guide
 
-This guide explains how to deploy your inventory tracking tool to Render while maintaining the three-user access restriction.
+This guide explains how to deploy your inventory tracking tool to Render with the admin_01 user system.
 
 ## Prerequisites
 
@@ -48,7 +48,7 @@ This guide explains how to deploy your inventory tracking tool to Render while m
 
 ## Step 3: Initialize Database and Users
 
-After your service is deployed, you need to set up the database schema and create the three users.
+After your service is deployed, you need to set up the database schema and create the admin users.
 
 ### Option A: Using Render Shell (Recommended)
 
@@ -58,13 +58,13 @@ After your service is deployed, you need to set up the database schema and creat
    - This opens a terminal in your deployed environment
 
 2. **Run the setup commands**:
-   ```bash
-   # Push database schema
-   npm run db:push
-   
-   # Set up production users
-   npm run setup-production
-   ```
+    ```bash
+    # Push database schema
+    npm run db:push
+
+    # Create admin users
+    npm run create-users
+    ```
 
 ### Option B: Using Local Development
 
@@ -77,10 +77,10 @@ If you prefer to set up from your local machine:
    ```
 
 2. **Run setup commands**:
-   ```bash
-   npm run db:push
-   npm run setup-production
-   ```
+    ```bash
+    npm run db:push
+    npm run create-users
+    ```
 
 ## Step 4: Verify Deployment
 
@@ -88,14 +88,14 @@ If you prefer to set up from your local machine:
    - Visit your Render service URL
    - You should see the login page
 
-2. **Test login with the three users**:
-   - **admin/admin123**
-   - **manager/manager123**
-   - **staff/staff123**
+2. **Test login with the admin users**:
+   - **admin_01/admin_01123**
+   - **admin_02/admin_02123**
+   - **admin_03/admin_03123**
 
 3. **Verify user restrictions**:
-   - Try creating a new user account (should fail)
-   - Only the three specified users should be able to login
+    - Try creating a new user account (should fail)
+    - Only the admin_01, admin_02, and admin_03 users should be able to login
 
 ## Step 5: Security Considerations
 
@@ -110,7 +110,7 @@ If you prefer to set up from your local machine:
 - SSL connections are automatically handled
 
 ### Application Security
-- Only the three specified users can login
+- Only the admin_01, admin_02, and admin_03 users can login
 - Passwords are hashed using bcrypt
 - Sessions are managed securely with Passport.js
 
@@ -130,8 +130,8 @@ npm run setup-production
 # Check user status
 npm run check-users
 
-# Re-setup users if needed
-npm run setup-production
+# Re-create users if needed
+npm run create-users
 ```
 
 ### Build Issues
@@ -164,7 +164,7 @@ npm run setup-production
 ### Updates
 - To update the application, simply push to your GitHub repository
 - Render will automatically redeploy
-- Run `npm run setup-production` after major updates if needed
+- Run `npm run create-users` after major updates if needed
 
 ### Backup
 - Render automatically backs up your PostgreSQL database

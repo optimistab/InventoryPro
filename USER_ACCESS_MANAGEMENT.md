@@ -1,16 +1,16 @@
 # User Access Management
 
-This system is configured to allow only three specific users to login and access the application.
+This system is configured to allow only specific admin users to login and access the application.
 
 ## Allowed Users
 
-The following three users are the only ones allowed to login:
+The following admin users are the only ones allowed to login:
 
-| Username | Password | Role    |
-|----------|----------|---------|
-| admin    | admin123 | admin   |
-| manager  | manager123 | manager |
-| staff    | staff123 | staff   |
+| Username  | Password     | Role    |
+|-----------|--------------|---------|
+| admin_01  | admin_01123  | admin   |
+| admin_02  | admin_02123  | admin   |
+| admin_03  | admin_03123  | admin   |
 
 ## Available Commands
 
@@ -45,7 +45,7 @@ The authentication system checks this field during login attempts and only allow
 
 1. **Password Hashing**: All passwords are hashed using bcrypt before storage
 2. **Active User Check**: Only users with `is_active = true` can login
-3. **Role-Based Access**: Each user has a specific role (admin, manager, staff)
+3. **Role-Based Access**: All users have admin role for full system access
 4. **Session Management**: Uses Passport.js for secure session handling
 
 ## Initial Setup
