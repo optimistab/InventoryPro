@@ -7,6 +7,7 @@ import pool from "../db"; // your pg Pool
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import setupDatabaseDrizzle from "../scripts/setupDatabaseDrizzle";
+import { createUsersIfNeeded } from "../scripts/createUsers";
 
 const app = express();
 const PgSession = pgSession(session);
@@ -72,6 +73,16 @@ app.use((req, res, next) => {
   } catch (error) {
     console.error('❌ Database setup with Drizzle migrations failed:', error);
     log('⚠️  Database setup failed, but continuing...');
+  }
+
+  // Create users automatically if they don't exist (for first deployment)
+  try {
+    console.log("👥 Checking and creating users if needed...");
+    await createUsersIfNeeded();
+    log('✅ User setup completed');
+  } catch (error) {
+    console.error('❌ User setup failed:', error);
+    log('⚠️  User setup failed, but continuing...');
   }
   
   console.log("Registering routes...");
