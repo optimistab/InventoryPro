@@ -88,9 +88,10 @@ app.use((req, res, next) => {
       log('✅ User setup completed');
     } catch (error) {
       console.error('❌ User setup failed:', error);
-      log('⚠️  User setup failed, but continuing...');
+      log('⚠️  User setup failed, but application will continue...');
+      // Don't let user creation errors crash the app
     }
-  }, 2000); // 2 second delay to ensure schema is ready
+  }, 2000).unref(); // unref() prevents this timer from keeping the process alive
   
   console.log("Registering routes...");
   const server = await registerRoutes(app);

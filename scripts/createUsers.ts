@@ -84,11 +84,15 @@ async function createUsers() {
 
 // Export a function for automatic user creation during deployment
 export async function createUsersIfNeeded() {
+  let client;
   try {
     console.log("🔍 Checking if users table exists and if users exist...");
 
+    // Get a client from the pool for this operation
+    client = await pool.connect();
+
     // First check if users table exists
-    const tableCheck = await pool.query(`
+    const tableCheck = await client.query(`
       SELECT EXISTS (
         SELECT FROM information_schema.tables
         WHERE table_schema = 'public'
@@ -102,7 +106,7 @@ export async function createUsersIfNeeded() {
     }
 
     // Check if any users exist
-    const userCheck = await pool.query("SELECT COUNT(*) as count FROM users");
+    const userCheck = await client.query("SELECT COUNT(*) as count FROM users");
     const userCount = parseInt(userCheck.rows[0].count);
 
     if (userCount > 0) {
@@ -140,17 +144,22 @@ export async function createUsersIfNeeded() {
     // Hash passwords and insert users
     console.log("👥 Creating users...");
     for (const user of allUsers) {
-      // Hash the password
-      const hashedPassword = await bcrypt.hash(user.password, 10);
+      try {
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(user.password, 10);
 
-      // Insert user into database using raw SQL
-      await pool.query(
-        `INSERT INTO users (username, password, role, date_of_creation, is_active)
-         VALUES ($1, $2, $3, $4, $5)`,
-        [user.username, hashedPassword, user.role, new Date().toISOString(), true]
-      );
+        // Insert user into database using raw SQL
+        await client.query(
+          `INSERT INTO users (username, password, role, date_of_creation, is_active)
+           VALUES ($1, $2, $3, $4, $5)`,
+          [user.username, hashedPassword, user.role, new Date().toISOString(), true]
+        );
 
-      console.log(`✅ Created user: ${user.username} (${user.role})`);
+        console.log(`✅ Created user: ${user.username} (${user.role})`);
+      } catch (userError) {
+        console.error(`❌ Failed to create user ${user.username}:`, userError);
+        // Continue with other users even if one fails
+      }
     }
 
     console.log("🎉 Initial users created successfully!");
@@ -158,7 +167,12 @@ export async function createUsersIfNeeded() {
 
   } catch (error) {
     console.error("❌ Error in createUsersIfNeeded:", error);
-    throw error; // Re-throw to let caller handle it
+    // Don't throw error - let the app continue running
+  } finally {
+    // Always release the client back to the pool
+    if (client) {
+      client.release();
+    }
   }
 }
 
