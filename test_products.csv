@@ -1,0 +1,4 @@
+name,sku,brand,model,category,condition,price,cost,stockQuantity,specifications,description
+"HP Pavilion 15","HP15-003","HP","Pavilion","laptop","new","1299.99","999.99","10","16GB RAM, 1TB SSD, AMD Ryzen 5","Reliable laptop for everyday use"
+"Lenovo ThinkPad X1","TPX1-004","Lenovo","ThinkPad X1","laptop","refurbished","1899.99","1499.99","2","16GB RAM, 512GB SSD, Intel i7","Business ultrabook with premium build"
+"Dell OptiPlex 7090","DO7090-005","Dell","OptiPlex 7090","desktop","new","899.99","699.99","5","16GB RAM, 512GB SSD, Intel i5","Compact desktop for office work"

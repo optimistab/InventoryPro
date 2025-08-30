@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, Laptop, Monitor, Edit, Trash2, Package, Filter } from "lucide-react";
+import { Search, Plus, Laptop, Monitor, Edit, Trash2, Package, Filter, Upload } from "lucide-react";
 import { useState } from "react";
 import ProductForm from "@/components/forms/product-form";
+import FileUpload from "@/components/FileUpload";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { Product } from "@shared/schema";
 
@@ -20,6 +21,7 @@ export default function Inventory() {
   const [stockFilter, setStockFilter] = useState<string>("all");
   const [deleteId, setDeleteId] = useState<number | 0>(0);
   const [editProduct, setEditProduct] = useState<Product | null>(null);
+  const [isFileUploadOpen, setIsFileUploadOpen] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: products, isLoading } = useQuery<Product[]>({
@@ -116,10 +118,16 @@ export default function Inventory() {
             <h2 className="text-2xl font-bold text-gray-900">Inventory</h2>
             <p className="text-gray-600">Manage your laptop and computer inventory</p>
           </div>
-          <Button onClick={() => setIsProductFormOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Product
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" onClick={() => setIsFileUploadOpen(true)}>
+              <Upload className="mr-2 h-4 w-4" />
+              Upload CSV/Excel
+            </Button>
+            <Button onClick={() => setIsProductFormOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Product
+            </Button>
+          </div>
         </div>
       </header>
 
@@ -344,6 +352,16 @@ export default function Inventory() {
               {deleteMutation.isPending ? "Deleting..." : "Delete"}
             </Button>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* File Upload Dialog */}
+      <Dialog open={isFileUploadOpen} onOpenChange={setIsFileUploadOpen}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Upload Products from CSV/Excel</DialogTitle>
+          </DialogHeader>
+          <FileUpload />
         </DialogContent>
       </Dialog>
     </div>

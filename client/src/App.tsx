@@ -8,8 +8,6 @@ import Dashboard from "@/pages/dashboard";
 import Inventory from "@/pages/inventory";
 import Sales from "@/pages/sales";
 import Clients from "@/pages/clients";
-import Recovery from "@/pages/recovery";
-import Predictions from "@/pages/predictions";
 import Sidebar from "@/components/layout/sidebar";
 import MobileHeader from "@/components/layout/mobile-header";
 import { useState, useEffect } from "react";
@@ -23,8 +21,6 @@ function Router() {
       <Route path="/inventory" component={Inventory} />
       <Route path="/sales" component={Sales} />
       <Route path="/clients" component={Clients} />
-      <Route path="/recovery" component={Recovery} />
-      <Route path="/predictions" component={Predictions} />
       <Route component={NotFound} />
     </Switch>
   );

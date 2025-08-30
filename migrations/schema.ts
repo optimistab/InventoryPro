@@ -43,21 +43,24 @@ export const productDateEvents = pgTable("product_date_events", {
 });
 
 export const products = pgTable("products", {
-	id: serial().primaryKey().notNull(),
-	name: text().notNull(),
-	sku: text().notNull(),
-	brand: text().notNull(),
-	model: text().notNull(),
-	category: text().notNull(),
-	condition: text().notNull(),
-	price: numeric({ precision: 10, scale:  2 }).notNull(),
-	cost: numeric({ precision: 10, scale:  2 }).notNull(),
-	stockQuantity: integer("stock_quantity").default(0).notNull(),
-	specifications: text(),
-	description: text(),
-	isActive: boolean("is_active").default(true).notNull(),
+  id: serial(), // Keep for backward compatibility
+  adsId: text("ads_id").primaryKey().notNull(),
+  referenceNumber: text("reference_number").notNull(),
+  name: text().notNull(),
+  sku: text().notNull(),
+  brand: text().notNull(),
+  model: text().notNull(),
+  category: text().notNull(),
+  condition: text().notNull(),
+  price: numeric({ precision: 10, scale:  2 }).notNull(),
+  cost: numeric({ precision: 10, scale:  2 }).notNull(),
+  stockQuantity: integer("stock_quantity").default(0).notNull(),
+  specifications: text(),
+  description: text(),
+  isActive: boolean("is_active").default(true).notNull(),
 }, (table) => [
-	unique("products_sku_unique").on(table.sku),
+  unique("products_sku_unique").on(table.sku),
+  unique("products_reference_number_unique").on(table.referenceNumber),
 ]);
 
 export const recoveryItems = pgTable("recovery_items", {

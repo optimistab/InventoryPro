@@ -11,7 +11,9 @@ export const sessions = pgTable("session", {
 
 // Products table - laptops and computers
 export const products = pgTable("products", {
-  id: serial("id").primaryKey(),
+  id: serial("id"), // Keep for backward compatibility, but adsId is now primary
+  adsId: text("ads_id").primaryKey(), // 11-digit numeric string, e.g., "12345678901"
+  referenceNumber: text("reference_number").notNull().unique(), // "ADS" + adsId, e.g., "ADS12345678901"
   name: text("name").notNull(),
   sku: text("sku").notNull().unique(),
   brand: text("brand").notNull(),
@@ -124,6 +126,8 @@ export const users = pgTable("users", {
 // Insert schemas
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
+  adsId: true,
+  referenceNumber: true,
 });
 
 export const insertClientSchema = createInsertSchema(clients).omit({

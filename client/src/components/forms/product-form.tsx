@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -39,6 +39,10 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
       isActive: true,
     },
   });
+
+  // Watch for product creation to show generated IDs
+  const [generatedAdsId, setGeneratedAdsId] = useState<string>("");
+  const [generatedReferenceNumber, setGeneratedReferenceNumber] = useState<string>("");
 
   // Prefill form when editing
   useEffect(() => {
@@ -81,12 +85,16 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
       const response = await apiRequest("POST", "/api/products", data);
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (product) => {
+      // Set the generated IDs for display
+      setGeneratedAdsId(product.adsId);
+      setGeneratedReferenceNumber(product.referenceNumber);
+
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       toast({
         title: "Success",
-        description: "Product created successfully",
+        description: `Product created successfully!\nAds ID: ${product.adsId}\nReference: ${product.referenceNumber}`,
       });
       onSuccess();
     },
@@ -166,6 +174,20 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             )}
           />
         </div>
+
+        {/* Display generated IDs for new products */}
+        {generatedAdsId && (
+          <div className="grid grid-cols-2 gap-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div>
+              <FormLabel className="text-green-700">Generated Ads ID</FormLabel>
+              <Input value={generatedAdsId} readOnly className="bg-green-100" />
+            </div>
+            <div>
+              <FormLabel className="text-green-700">Reference Number</FormLabel>
+              <Input value={generatedReferenceNumber} readOnly className="bg-green-100" />
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-2 gap-4">
           <FormField
@@ -300,10 +322,11 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             <FormItem>
               <FormLabel>Specifications</FormLabel>
               <FormControl>
-                <Textarea 
+                <Textarea
                   placeholder="16GB RAM, 512GB SSD, M2 Pro chip..."
                   className="min-h-[80px]"
                   {...field}
+                  value={field.value || ""}
                 />
               </FormControl>
               <FormMessage />
@@ -318,10 +341,11 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea 
+                <Textarea
                   placeholder="Product description..."
                   className="min-h-[60px]"
                   {...field}
+                  value={field.value || ""}
                 />
               </FormControl>
               <FormMessage />

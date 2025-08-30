@@ -30,10 +30,35 @@ async function checkUsers() {
     console.log(`   Active users: ${activeCount}`);
     console.log(`   Inactive users: ${totalCount - activeCount}`);
 
-    if (activeCount === 3) {
-      console.log("\n✅ System is properly restricted to 3 users only!");
+    // Expected counts for new user structure
+    const expectedCounts = {
+      admin: 3,
+      developer: 2,
+      support: 2,
+      salesperson: 6,
+      salesmanager: 2,
+      InventoryStaff: 2
+    };
+
+    const expectedTotal = Object.values(expectedCounts).reduce((sum, count) => sum + count, 0);
+
+    if (activeCount === expectedTotal) {
+      console.log(`\n✅ System has ${activeCount} active users as expected!`);
+
+      // Show breakdown by role
+      console.log("\n📈 Active Users by Role:");
+      const roleCounts: Record<string, number> = {};
+      allUsers.rows.filter((user: any) => user.is_active).forEach((user: any) => {
+        roleCounts[user.role] = (roleCounts[user.role] || 0) + 1;
+      });
+
+      for (const [role, count] of Object.entries(roleCounts)) {
+        const expected = expectedCounts[role as keyof typeof expectedCounts] || 0;
+        const status = count === expected ? "✅" : "⚠️";
+        console.log(`   ${role}: ${count}/${expected} ${status}`);
+      }
     } else {
-      console.log(`\n⚠️  System has ${activeCount} active users (expected 3)`);
+      console.log(`\n⚠️  System has ${activeCount} active users (expected ${expectedTotal})`);
     }
 
   } catch (error) {

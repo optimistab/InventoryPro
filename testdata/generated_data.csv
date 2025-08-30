@@ -1,0 +1,201 @@
+name,sku,brand,model,category,condition,price,cost,stockQuantity,specifications,description
+Dell XPS 13,DXPS13-002,Dell,XPS 13,laptop,new,1569.272718985439,1999.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,MacBook Pro,laptop,refurbished,1293.5383817866418,1712.897263939968,4,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+MacBook Pro 16-inch,MBP16-001,Apple,XPS 13,laptop,new,1669.7941820998249,1558.204290715471,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Dell,MacBook Pro,laptop,refurbished,2449.701472047718,1999.99,4,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Apple,XPS 13,laptop,new,2370.042931692061,1604.0925845181414,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Apple,XPS 13,laptop,new,1958.8156396282816,1193.5100611673931,3,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Dell,MacBook Pro,laptop,new,1441.2452548626486,1999.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Apple,XPS 13,laptop,refurbished,899.99,1999.99,4,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Dell,XPS 13,laptop,new,1407.2199077082228,872.5779072767195,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Dell,XPS 13,laptop,refurbished,2126.0133489552577,1220.9044174514759,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Apple,XPS 13,laptop,new,899.99,1270.0042820743124,3,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Dell,XPS 13,laptop,refurbished,1875.6797488528582,1114.9920124528912,4,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Apple,MacBook Pro,laptop,new,1738.4546238719413,1999.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,XPS 13,laptop,refurbished,2499.99,699.99,4,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+MacBook Pro 16-inch,MBP16-001,Dell,XPS 13,laptop,refurbished,1013.9210400207143,699.99,3,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,MacBook Pro,laptop,new,1913.5957717509896,699.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Dell,XPS 13,laptop,refurbished,1656.429545667498,1594.813588012931,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Dell,XPS 13,laptop,refurbished,899.99,1384.2874928629506,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Apple,MacBook Pro,laptop,refurbished,2499.99,699.99,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Apple,MacBook Pro,laptop,refurbished,2499.99,1492.8185325323175,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,MacBook Pro,laptop,refurbished,2499.99,1057.0376155581519,3,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,XPS 13,laptop,new,1626.9965638123695,1269.3636062914795,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Dell,XPS 13,laptop,refurbished,2192.3336912356217,699.99,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Apple,XPS 13,laptop,refurbished,1754.7527500734236,1433.0217695995434,4,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Dell,MacBook Pro,laptop,refurbished,2218.153169193019,1999.99,5,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+MacBook Pro 16-inch,MBP16-001,Dell,MacBook Pro,laptop,new,1604.4912365226005,699.99,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,MBP16-001,Apple,MacBook Pro,laptop,new,2092.7019087524905,861.1051910450717,3,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Dell,MacBook Pro,laptop,new,1520.3406833011047,1586.2600600394508,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,XPS 13,laptop,new,899.99,699.99,4,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Dell,XPS 13,laptop,new,899.99,699.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Apple,MacBook Pro,laptop,refurbished,1631.723960455413,699.99,5,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Apple,MacBook Pro,laptop,new,1759.7285848985548,699.99,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Apple,XPS 13,laptop,new,1331.6054126781673,1495.4864928177567,4,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Apple,XPS 13,laptop,new,899.99,1072.97143776029,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,MacBook Pro,laptop,new,2178.4699954777843,1114.9774185532026,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,MBP16-001,Apple,XPS 13,laptop,refurbished,2499.99,1536.6414742016013,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,XPS 13,laptop,new,2126.363365074487,1999.99,5,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Dell,MacBook Pro,laptop,refurbished,1444.7346107802446,1118.2417824811573,3,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,MBP16-001,Dell,XPS 13,laptop,new,2249.789304723833,1658.8720605902893,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,XPS 13,laptop,new,1479.3817997206143,1481.99206437079,4,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Apple,XPS 13,laptop,refurbished,899.99,1032.2827273562386,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Dell,MacBook Pro,laptop,new,899.99,1573.4822516761537,5,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Dell,MacBook Pro,laptop,new,2363.8820660810247,1488.7552356920346,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,MacBook Pro,laptop,new,1915.0346924964565,1501.778437520208,4,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+MacBook Pro 16-inch,DXPS13-002,Apple,MacBook Pro,laptop,new,2280.417637790158,1015.5095615320772,3,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,MacBook Pro,laptop,refurbished,2499.99,1999.99,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Apple,MacBook Pro,laptop,new,1902.626847214759,1999.99,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,XPS 13,laptop,new,2499.99,1576.4387407939344,3,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,MacBook Pro,laptop,refurbished,2460.0680592541476,1722.8452065270014,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,MacBook Pro,laptop,new,1050.259579651082,1999.99,5,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Dell,MacBook Pro,laptop,refurbished,2499.99,1999.99,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,MBP16-001,Apple,XPS 13,laptop,new,2426.6284597118274,1999.99,3,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,MBP16-001,Dell,MacBook Pro,laptop,new,899.99,1697.8717622158479,3,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Apple,MacBook Pro,laptop,new,899.99,1553.6672726609786,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,MBP16-001,Dell,MacBook Pro,laptop,refurbished,2499.99,1999.99,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Dell,MacBook Pro,laptop,refurbished,1756.633038345221,1141.6397894757113,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,DXPS13-002,Dell,XPS 13,laptop,new,2035.2537986995824,1164.7496514071033,4,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Apple,MacBook Pro,laptop,new,899.99,699.99,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,XPS 13,laptop,new,1817.2332951095946,1255.8851602528248,3,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Apple,MacBook Pro,laptop,new,2499.99,699.99,3,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+MacBook Pro 16-inch,DXPS13-002,Dell,XPS 13,laptop,new,2499.99,1763.861252287023,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Dell,XPS 13,laptop,refurbished,1581.8967998596852,1326.8334779645843,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Dell,MacBook Pro,laptop,new,899.99,1790.7247782044637,5,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Dell,MacBook Pro,laptop,new,1538.2362350204198,1999.99,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Apple,XPS 13,laptop,new,1416.4545960071841,1999.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Dell,MacBook Pro,laptop,refurbished,899.99,1773.2876064895331,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,DXPS13-002,Apple,MacBook Pro,laptop,refurbished,2051.6671289937485,1999.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,XPS 13,laptop,refurbished,1422.9624732410819,1706.9694617116777,4,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Dell,MacBook Pro,laptop,refurbished,998.7081783222316,1211.6171627659328,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Dell,XPS 13,laptop,new,1474.8349326595824,1455.8785236669505,4,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Apple,MacBook Pro,laptop,new,1125.9768043020404,1321.9903608930276,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,MacBook Pro,laptop,new,2337.6056504895287,806.2846224438908,3,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Apple,MacBook Pro,laptop,new,1999.1489625770232,1736.1715956232279,3,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Dell,XPS 13,laptop,new,925.4679362274777,1190.8971591593677,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,MBP16-001,Apple,MacBook Pro,laptop,new,2239.5860854188577,699.99,5,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+MacBook Pro 16-inch,DXPS13-002,Dell,MacBook Pro,laptop,refurbished,1363.055073003989,818.625925299181,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Dell,XPS 13,laptop,new,899.99,1671.1666265594586,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Apple,MacBook Pro,laptop,new,899.99,699.99,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Apple,XPS 13,laptop,refurbished,1768.311577970593,1190.289997375108,4,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Dell,XPS 13,laptop,refurbished,2295.7168627107712,699.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Apple,MacBook Pro,laptop,refurbished,1726.5682991135698,1506.7871546949912,4,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,XPS 13,laptop,new,2459.8708754402087,711.3919277583307,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Apple,XPS 13,laptop,refurbished,908.0797305459431,1552.3526606306636,3,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,MacBook Pro,laptop,refurbished,1323.3303640441043,699.99,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Dell,MacBook Pro,laptop,refurbished,1939.750582312821,1368.2102329267132,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Apple,XPS 13,laptop,refurbished,899.99,1999.99,3,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Apple,MacBook Pro,laptop,new,1256.2959496293156,1585.9924634691952,3,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Apple,XPS 13,laptop,new,1227.0711356042393,1117.933257143701,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Apple,MacBook Pro,laptop,refurbished,1563.9847887022938,699.99,4,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+MacBook Pro 16-inch,DXPS13-002,Apple,MacBook Pro,laptop,new,2499.99,1999.99,4,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Apple,XPS 13,laptop,refurbished,2499.99,1999.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Dell,MacBook Pro,laptop,refurbished,1792.797333238896,699.99,3,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,XPS 13,laptop,refurbished,1603.77595134913,699.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,DXPS13-002,Apple,XPS 13,laptop,refurbished,1723.420236361518,1999.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,XPS 13,laptop,new,2499.99,1999.99,5,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+MacBook Pro 16-inch,DXPS13-002,Apple,XPS 13,laptop,new,1601.943807703145,1336.8399833776307,3,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,XPS 13,laptop,refurbished,965.54551505688,1693.462703681269,3,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,DXPS13-002,Apple,XPS 13,laptop,new,1837.8085492510806,1307.730889811132,4,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,MacBook Pro,laptop,new,2499.99,849.7440460379028,5,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,MacBook Pro,laptop,refurbished,1469.7537434633716,1999.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,MacBook Pro,laptop,new,2499.99,1367.4450638339497,3,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,MBP16-001,Dell,MacBook Pro,laptop,refurbished,2142.758529249373,699.99,4,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Dell,MacBook Pro,laptop,refurbished,899.99,1824.8346073114467,3,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,MacBook Pro,laptop,new,1888.1586108070564,699.99,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Dell,MacBook Pro,laptop,new,1128.882291975649,699.99,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Dell,XPS 13,laptop,refurbished,1100.7032979098753,1524.0573607602291,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Apple,XPS 13,laptop,refurbished,2162.35653267759,1585.4381885815853,4,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Apple,XPS 13,laptop,new,2208.592434895822,934.1193957637797,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Apple,XPS 13,laptop,refurbished,2499.99,1479.0145904624376,3,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Dell,MacBook Pro,laptop,new,2132.8266604417013,1115.37174866476,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Apple,XPS 13,laptop,new,2097.768826134109,1999.99,4,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Dell,MacBook Pro,laptop,new,1765.6037237470143,883.3293991269779,4,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Apple,MacBook Pro,laptop,new,1496.0524672790068,1999.99,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Dell,XPS 13,laptop,refurbished,2090.5638767787905,1147.8793126021947,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Dell,XPS 13,laptop,refurbished,963.3195135590112,1647.915947363387,3,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Dell,XPS 13,laptop,new,1108.5982996692278,1392.9208364066994,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,MacBook Pro,laptop,refurbished,1426.7124393998806,1392.0935429432611,4,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Apple,XPS 13,laptop,new,1174.7785743519462,948.0927844239188,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,MBP16-001,Dell,MacBook Pro,laptop,refurbished,899.99,699.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,MBP16-001,Apple,MacBook Pro,laptop,new,1201.3015516758192,1819.3788290715365,5,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Dell,XPS 13,laptop,refurbished,1701.1379115114244,1725.4248739322754,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,XPS 13,laptop,refurbished,1680.27687521806,1039.6552960511945,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,MBP16-001,Dell,XPS 13,laptop,refurbished,1834.5871123943339,869.7074234323215,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Dell,XPS 13,laptop,new,2499.99,1999.99,4,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Apple,XPS 13,laptop,new,1831.172339562812,1371.576475351798,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Apple,MacBook Pro,laptop,new,899.99,1939.6231026585976,5,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,MacBook Pro,laptop,refurbished,899.99,1750.4716172604878,3,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+MacBook Pro 16-inch,DXPS13-002,Dell,XPS 13,laptop,new,2499.99,1646.9562580302645,3,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,XPS 13,laptop,new,899.99,699.99,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Apple,XPS 13,laptop,new,1840.6226959084838,1861.906716356001,5,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Dell,XPS 13,laptop,new,1951.4735076758168,1180.7109471444924,3,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Apple,XPS 13,laptop,new,1707.3281920615043,925.6812011610159,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,XPS 13,laptop,refurbished,899.99,1598.7122382813675,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,DXPS13-002,Dell,MacBook Pro,laptop,new,2234.1579366079723,951.4167254558724,4,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Apple,MacBook Pro,laptop,refurbished,1884.8256500521734,1024.9390739343967,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Dell,MacBook Pro,laptop,new,2499.99,1308.428283191116,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Dell,MacBook Pro,laptop,new,1772.1705774283605,1403.9522686791524,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Apple,XPS 13,laptop,refurbished,1047.6727898150884,1864.8523927530414,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Apple,MacBook Pro,laptop,refurbished,899.99,1279.6771246207716,4,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Dell,XPS 13,laptop,new,2046.1447000287594,699.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,MacBook Pro,laptop,refurbished,2499.99,1999.99,3,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Apple,XPS 13,laptop,refurbished,2499.99,1799.2601154861404,3,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,MacBook Pro,laptop,refurbished,1947.8642339762246,1425.7830323396074,3,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,XPS 13,laptop,new,1700.2808717727698,988.8083327201039,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,MacBook Pro,laptop,refurbished,1547.0292708800025,1964.4029479194414,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Apple,MacBook Pro,laptop,new,1247.1733665295828,1392.4560661356227,4,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,XPS 13,laptop,new,2178.0436071549293,1385.1387164353157,3,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,MacBook Pro,laptop,new,1543.2562172043906,1147.6570024671987,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Apple,MacBook Pro,laptop,new,1377.1596099660096,1180.158343792929,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,XPS 13,laptop,new,2416.1534533996496,1567.062422491474,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Apple,XPS 13,laptop,refurbished,899.99,1999.99,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,XPS 13,laptop,new,899.99,1999.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,XPS 13,laptop,refurbished,1351.666116668759,984.0777235216456,3,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Apple,XPS 13,laptop,new,2327.912198968759,699.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,MacBook Pro,laptop,new,899.99,1918.217506914098,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,DXPS13-002,Apple,XPS 13,laptop,refurbished,2499.99,1562.5026004291872,5,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Dell,XPS 13,laptop,refurbished,1796.1242810751244,1999.99,5,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,MacBook Pro,laptop,refurbished,2292.1129291129414,1703.501175938502,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,MacBook Pro,laptop,refurbished,1322.813839183149,884.1063665690465,3,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,DXPS13-002,Apple,MacBook Pro,laptop,new,1663.7827006444336,1999.99,5,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Apple,XPS 13,laptop,new,2102.1747403335594,1327.747099491266,3,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Apple,MacBook Pro,laptop,refurbished,968.6792403493583,1020.1907288573416,4,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Apple,MacBook Pro,laptop,new,1035.5803177511375,699.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Dell,XPS 13,laptop,new,2059.2082996059657,1107.7651709657684,5,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Apple,MacBook Pro,laptop,refurbished,1141.145355800606,1736.7800532298304,4,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Apple,MacBook Pro,laptop,new,899.99,699.99,5,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,MacBook Pro,laptop,refurbished,2499.99,699.99,5,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Apple,MacBook Pro,laptop,refurbished,2077.5176665982667,848.5325337285223,4,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Dell,MacBook Pro,laptop,refurbished,2320.2522569820994,1999.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Apple,XPS 13,laptop,new,1690.6953753678627,1991.4048036424588,4,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,MacBook Pro,laptop,new,2207.5436497691576,1167.1687809660104,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,XPS 13,laptop,new,1986.8942286288675,1740.2313294037033,3,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,MacBook Pro,laptop,refurbished,1964.7507780482158,699.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Dell,MacBook Pro,laptop,refurbished,2337.4507222072098,938.4042848078158,4,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,XPS 13,laptop,refurbished,1583.2855674401053,702.0816894402881,5,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,MacBook Pro,laptop,new,2175.7894178912074,1999.99,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,MacBook Pro,laptop,new,933.040578600668,1161.2369514635898,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Dell,XPS 13,laptop,refurbished,937.8961168162883,1993.844208741029,4,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Dell,XPS 13,laptop,new,1927.1397825437925,1999.99,5,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,MacBook Pro,laptop,refurbished,1323.0147963020322,1476.0511545228812,4,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+MacBook Pro 16-inch,DXPS13-002,Dell,MacBook Pro,laptop,new,2499.99,784.7018535998718,5,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+MacBook Pro 16-inch,MBP16-001,Dell,XPS 13,laptop,new,2065.4511743437183,1784.5367269299104,3,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,MacBook Pro,laptop,new,1658.7504789444927,699.99,4,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Apple,XPS 13,laptop,new,1218.0085140481544,1036.8026287029504,3,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Dell,XPS 13,laptop,refurbished,899.99,1999.99,5,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+MacBook Pro 16-inch,MBP16-001,Dell,MacBook Pro,laptop,new,2499.99,752.9101155405182,3,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,MBP16-001,Apple,MacBook Pro,laptop,new,899.99,1025.0865454449358,4,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,MacBook Pro,laptop,new,2499.99,1612.7938761456421,3,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,XPS 13,laptop,refurbished,1206.9347453333503,1947.7492130060832,3,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Apple,MacBook Pro,laptop,new,899.99,1911.1709670872667,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,DXPS13-002,Dell,MacBook Pro,laptop,refurbished,1809.4320198237872,1636.7571975516846,4,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,DXPS13-002,Dell,MacBook Pro,laptop,refurbished,2499.99,1999.99,3,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Apple,MacBook Pro,laptop,new,1723.2441314876507,1848.402662740933,3,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Dell,MacBook Pro,laptop,refurbished,899.99,1575.1343247929847,5,"8GB RAM, 256GB SSD, Intel i5",Professional laptop for creative work
+Dell XPS 13,DXPS13-002,Apple,XPS 13,laptop,refurbished,2088.9645475054945,1313.565109372442,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+Dell XPS 13,MBP16-001,Dell,MacBook Pro,laptop,refurbished,1445.7670200744496,1870.8478836372824,5,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Apple,MacBook Pro,laptop,new,1581.94966166947,1161.184118189994,3,"16GB RAM, 512GB SSD, M2 Pro chip",Compact ultrabook for business
+Dell XPS 13,DXPS13-002,Apple,XPS 13,laptop,refurbished,2499.99,1167.7962201392024,5,"16GB RAM, 512GB SSD, M2 Pro chip",Professional laptop for creative work
+MacBook Pro 16-inch,DXPS13-002,Apple,MacBook Pro,laptop,new,899.99,1999.99,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
+MacBook Pro 16-inch,MBP16-001,Apple,XPS 13,laptop,new,908.4591873433443,699.99,5,"8GB RAM, 256GB SSD, Intel i5",Compact ultrabook for business
