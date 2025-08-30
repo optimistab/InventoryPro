@@ -1,19 +1,19 @@
 # InventoryPro - Inventory Tracking Tool
 
-A secure inventory tracking system designed for managing laptops, computers, and related equipment with restricted access for only three authorized users.
+A secure inventory tracking system designed for managing laptops, computers, and related equipment with role-based access control for multiple authorized users across different departments.
 
 ## 🚀 Features
 
-- **Secure User Access**: Only three authorized users can access the system
+- **Secure User Access**: 17 authorized users across 6 roles (Admin, Developer, Support, Sales, Sales Manager, Inventory Staff)
 - **Inventory Management**: Track products, clients, sales, and recovery items
 - **Product Lifecycle Tracking**: Monitor product events from addition to disposal
 - **Client Requirements Management**: Track customer needs and specifications
 - **Dashboard Analytics**: Real-time statistics and insights
-- **Role-Based Access**: Admin, Manager, and Staff roles with different permissions
+- **Role-Based Access**: Comprehensive role system with department-specific permissions
 
 ## 🔐 Security
 
-- **Restricted Access**: Only three specific users can login
+- **Restricted Access**: 17 authorized users across 6 roles with controlled access
 - **Password Hashing**: Secure bcrypt password encryption
 - **Session Management**: Secure session handling with Passport.js
 - **Database Security**: PostgreSQL with SSL connections in production
@@ -63,8 +63,36 @@ A secure inventory tracking system designed for managing laptops, computers, and
    ```
 
 7. **Access the application**:
-   - Open http://localhost:3000
-   - Login with one of the three authorized users
+    - Open http://localhost:3000
+    - Login with one of the 17 authorized users (see user list below)
+
+## 👥 Authorized Users
+
+After running `npm run create-users`, the following users will be available:
+
+### Admin Users (Full System Access)
+- `admin_01` / `admin_01123`
+- `admin_02` / `admin_02123`
+- `admin_03` / `admin_03123`
+
+### Developer Users
+- `dev_01` / `dev_01123`
+- `dev_02` / `dev_02123`
+
+### Support Users
+- `support_01` / `support_01123`
+- `support_02` / `support_02123`
+
+### Sales Users
+- `sales_01` through `sales_06` / `sales_01123` through `sales_06123`
+
+### Sales Manager Users
+- `sales_mgr_01` / `sales_mgr_01123`
+- `sales_mgr_02` / `sales_mgr_02123`
+
+### Inventory Staff Users
+- `inv_staff_01` / `inv_staff_01123`
+- `inv_staff_02` / `inv_staff_02123`
 
 ## 🚀 Deployment to Render
 
@@ -80,12 +108,12 @@ A secure inventory tracking system designed for managing laptops, computers, and
      - `NODE_ENV=production`
      - `DATABASE_URL=your_postgresql_connection_string`
 
-3. **Initialize the database**:
-   - Use Render Shell to run:
-     ```bash
-     npm run db:push
-     npm run setup-production
-     ```
+3. **Initialize the database and users**:
+    - Use Render Shell to run:
+      ```bash
+      npm run db:push
+      npm run create-users
+      ```
 
 For detailed deployment instructions, see [RENDER_DEPLOYMENT.md](./RENDER_DEPLOYMENT.md)
 
@@ -106,10 +134,9 @@ npm run db:push      # Push schema changes to database
 
 ### User Management
 ```bash
-npm run create-users     # Create the three authorized users
+npm run create-users     # Create all 17 authorized users across 6 roles
 npm run restrict-users   # Deactivate unauthorized users
 npm run check-users      # Check current user status
-npm run setup-production # Set up production environment
 ```
 
 ## 🗄️ Database Schema
@@ -175,8 +202,8 @@ The application automatically handles:
 ## 🔒 Security Features
 
 ### Access Control
-- Only three predefined users can access the system
-- Role-based permissions (admin, manager, staff)
+- 17 authorized users across 6 roles (admin, developer, support, salesperson, salesmanager, InventoryStaff)
+- Role-based permissions with department-specific access
 - Session-based authentication
 - Automatic user deactivation for unauthorized accounts
 
@@ -193,7 +220,7 @@ The application automatically handles:
 **"User not found or inactive"**
 ```bash
 npm run check-users
-npm run setup-production
+npm run create-users
 ```
 
 **Database connection issues**
@@ -202,7 +229,7 @@ npm run setup-production
 echo $DATABASE_URL
 
 # Test connection
-npm run setup-production
+npm run create-users
 ```
 
 **Build errors**
@@ -236,6 +263,4 @@ This is a private inventory management system with restricted access. For intern
 For technical support or questions about the system:
 - Check the documentation files
 - Review the troubleshooting section
-- Contact the system administrator 
-
-# npx drizzle-kit studio
+- Contact the system administrator
