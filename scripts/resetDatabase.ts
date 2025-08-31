@@ -10,7 +10,14 @@ import { users } from '../shared/schema';
 dotenv.config();
 
 async function resetDatabase() {
-  console.log('🔄 Resetting database for development...');
+  console.log('🔄 Resetting database...');
+  console.log('📍 Environment:', process.env.NODE_ENV);
+  console.log('🔗 Database URL exists:', !!process.env.DATABASE_URL);
+
+  if (!process.env.DATABASE_URL) {
+    console.error('❌ DATABASE_URL environment variable is not set!');
+    throw new Error('DATABASE_URL is required');
+  }
 
   // Create connection pool
   const pool = new Pool({
@@ -139,7 +146,7 @@ async function resetDatabase() {
 if (import.meta.url === `file://${process.argv[1]}`) {
   resetDatabase()
     .then(() => {
-      console.log('🚀 Database is ready for development!');
+      console.log('🚀 Database is ready!');
       process.exit(0);
     })
     .catch((error) => {

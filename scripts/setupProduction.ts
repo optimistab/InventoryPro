@@ -8,16 +8,8 @@ async function setupProduction() {
   console.log('🚀 Setting up production environment...');
   
   try {
-    // Step 1: Reset database to erase all data
-    console.log('📦 Step 1: Resetting database to erase all data...');
-
-    try {
-      execSync('npm run db:reset', { stdio: 'inherit' });
-      console.log('✅ Database reset completed!');
-    } catch (resetError) {
-      console.log('⚠️  Database reset failed, but continuing...');
-      console.log('💡 This might happen if database is not accessible');
-    }
+    // Database is already reset during build process
+    console.log('📦 Database already reset during build process');
     
     // Step 2: Build the application
     console.log('🔨 Step 2: Building application...');

@@ -6,14 +6,14 @@
   "scripts": {
     "dev": "npm run db:reset && NODE_ENV=development tsx server/index.ts",
     "dev:no-reset": "NODE_ENV=development tsx server/index.ts",
-    "build": "npm run db:push && vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "build": "npm run db:reset && vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
     "start": "NODE_ENV=production node dist/index.js",
     "check": "tsc",
     "db:push": "drizzle-kit push",
     "db:reset": "tsx scripts/resetDatabase.ts",
     "db:setup": "tsx scripts/setupDatabase.ts",
     "db:seed": "tsx scripts/seedDatabase.ts",
-    "db:fresh": "PGPASSWORD=\"User@123\" psql -h localhost -p 5432 -U postgres -d inventoryprodb -f migrations/0002_add_ads_id.sql",
+    "db:fresh": "echo 'This script is deprecated. Use db:reset instead.'",
     "create-users": "tsx scripts/createUsers.ts",
     "restrict-users": "tsx scripts/restrictUsers.ts",
     "check-users": "tsx scripts/checkUsers.ts",
@@ -21,7 +21,8 @@
     "db:check": "tsx scripts/setupDatabaseDrizzle.ts",
     "db:migrate": "tsx scripts/setupDatabaseDrizzle.ts",
     "db:generate": "tsx scripts/generateMigration.ts",
-    "deploy": "tsx scripts/deploy.ts"
+    "deploy": "tsx scripts/deploy.ts",
+    "render-build": "echo 'Render build starting...' && npm run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",

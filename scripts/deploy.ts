@@ -7,11 +7,13 @@ dotenv.config();
 
 async function deploy() {
   console.log('🚀 Starting deployment process...');
-  
+  console.log('📍 Current working directory:', process.cwd());
+  console.log('🔗 DATABASE_URL exists:', !!process.env.DATABASE_URL);
+  console.log('🌍 NODE_ENV:', process.env.NODE_ENV);
+
   try {
-    // Step 1: Reset database to erase all data
-    console.log('📦 Step 1: Resetting database to erase all data...');
-    execSync('npm run db:reset', { stdio: 'inherit' });
+    // Database is already reset during build process
+    console.log('📦 Database already reset during build process');
     
     // Step 2: Build the application (for production)
     if (process.env.NODE_ENV === 'production') {

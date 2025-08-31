@@ -66,10 +66,9 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Database setup is now handled by the reset script
-  // No additional setup needed since we reset everything on startup
-  console.log("📊 Database setup handled by reset script - no additional setup needed");
-  log('✅ Database setup completed via reset script');
+  // Database is reset during build process, no additional setup needed
+  console.log("📊 Database setup completed");
+  log('✅ Database setup completed');
   
   console.log("Registering routes...");
   const server = await registerRoutes(app);
