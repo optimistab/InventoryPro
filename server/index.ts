@@ -91,7 +91,7 @@ app.use((req, res, next) => {
       log('⚠️  User setup failed, but application will continue...');
       // Don't let user creation errors crash the app
     }
-  }, 2000).unref(); // unref() prevents this timer from keeping the process alive
+  }, 2000); // Removed .unref() to keep the process alive
   
   console.log("Registering routes...");
   const server = await registerRoutes(app);
