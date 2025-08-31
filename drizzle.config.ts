@@ -11,7 +11,9 @@ export default defineConfig({
   schema: "./shared/schema.ts",
   dialect: "postgresql",
   dbCredentials: {
-    url: process.env.DATABASE_URL,
+    url: process.env.DATABASE_URL?.includes('render.com')
+      ? `${process.env.DATABASE_URL}?sslmode=require`
+      : process.env.DATABASE_URL,
     ssl: process.env.DATABASE_URL?.includes('render.com') ? { rejectUnauthorized: false } : false,
   },
 });
