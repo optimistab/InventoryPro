@@ -148,10 +148,14 @@ export class PostgresStorage implements IStorage {
   }
 
   async createProduct(product: InsertProduct): Promise<Product> {
-    // Generate 11-digit adsId
-    const timestamp = Date.now().toString().slice(-8); // Last 8 digits of timestamp
-    const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0'); // 4 random digits
-    const adsId = (timestamp + random).padStart(11, '0'); // Ensure exactly 11 digits
+    // Generate incremental 11-digit adsId starting from 10000000001
+    const result = await pool.query(`
+      SELECT COALESCE(MAX(CAST(ads_id AS BIGINT)), 10000000000) as max_id
+      FROM products
+    `);
+    const maxId = Number(result.rows[0].max_id);
+    const nextId = maxId + 1;
+    const adsId = nextId.toString().padStart(11, '0');
     const referenceNumber = `ADS${adsId}`;
 
     const res = await pool.query(
@@ -207,6 +211,13 @@ export class PostgresStorage implements IStorage {
 
     try {
       await client.query('BEGIN');
+
+      // Get the current max adsId once at the beginning
+      const maxIdResult = await client.query(`
+        SELECT COALESCE(MAX(CAST(ads_id AS BIGINT)), 10000000000) as max_id
+        FROM products
+      `);
+      let currentMaxId = Number(maxIdResult.rows[0].max_id);
 
       for (const product of products) {
         // Check if product with this SKU already exists
@@ -278,10 +289,9 @@ export class PostgresStorage implements IStorage {
           );
         } else {
           // Create new product
-          // Generate 11-digit adsId
-          const timestamp = Date.now().toString().slice(-8);
-          const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0');
-          const adsId = (timestamp + random).padStart(11, '0');
+          // Generate incremental 11-digit adsId starting from 10000000001
+          currentMaxId += 1;
+          const adsId = currentMaxId.toString().padStart(11, '0');
           const referenceNumber = `ADS${adsId}`;
 
           const res = await client.query(
@@ -463,15 +473,61 @@ export class PostgresStorage implements IStorage {
   }
 
   async deleteProductByAdsId(adsId: string): Promise<boolean> {
-    const res = await pool.query("DELETE FROM products WHERE ads_id = $1", [adsId]);
-    return (res.rowCount ?? 0) > 0;
+    // Soft delete: set isActive to false instead of hard delete
+    const res = await pool.query("UPDATE products SET is_active = false WHERE ads_id = $1", [adsId]);
+    const success = (res.rowCount ?? 0) > 0;
+
+    if (success) {
+      // Create product date event for deactivation
+      await pool.query(
+        `INSERT INTO product_date_events
+          (ads_id, event_type, event_date, notes, created_at)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [
+          adsId,
+          'product_deactivated',
+          new Date().toISOString(),
+          `Product deactivated from inventory`,
+          new Date().toISOString()
+        ]
+      );
+    }
+
+    return success;
   }
 
   async deleteProduct(id: number): Promise<boolean> {
-    console.log(`Deleting product with ID: ${id}`);
-    const res = await pool.query("DELETE FROM products WHERE id = $1", [id]);
-    console.log(`Delete result: ${res}`);
-    return (res.rowCount ?? 0) > 0;
+    console.log(`Soft deleting product with ID: ${id}`);
+
+    // First get the product to get its adsId for the event
+    const product = await this.getProduct(id);
+    if (!product) {
+      console.log(`Product with ID ${id} not found`);
+      return false;
+    }
+
+    // Soft delete: set isActive to false instead of hard delete
+    const res = await pool.query("UPDATE products SET is_active = false WHERE id = $1", [id]);
+    const success = (res.rowCount ?? 0) > 0;
+
+    if (success) {
+      // Create product date event for deactivation
+      await pool.query(
+        `INSERT INTO product_date_events
+          (ads_id, event_type, event_date, notes, created_at)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [
+          product.adsId,
+          'product_deactivated',
+          new Date().toISOString(),
+          `Product ${product.name} deactivated from inventory`,
+          new Date().toISOString()
+        ]
+      );
+    }
+
+    console.log(`Soft delete result: ${success}`);
+    return success;
   }
 
   // Clients
