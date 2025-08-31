@@ -4,6 +4,7 @@ import { execSync } from 'child_process';
 // Load environment variables
 dotenv.config();
 
+
 async function deploy() {
   console.log('🚀 Starting deployment process...');
   
