@@ -266,7 +266,7 @@ export class PostgresStorage implements IStorage {
           // Create product date event for updated product
           await client.query(
             `INSERT INTO product_date_events
-              (product_ads_id, event_type, event_date, notes, created_at)
+              (ads_id, event_type, event_date, notes, created_at)
              VALUES ($1, $2, $3, $4, $5)`,
             [
               updatedProduct.adsId,
@@ -332,7 +332,7 @@ export class PostgresStorage implements IStorage {
           // Create product date event for new product
           await client.query(
             `INSERT INTO product_date_events
-              (product_ads_id, event_type, event_date, notes, created_at)
+              (ads_id, event_type, event_date, notes, created_at)
              VALUES ($1, $2, $3, $4, $5)`,
             [
               createdProduct.adsId,
@@ -627,7 +627,7 @@ export class PostgresStorage implements IStorage {
         p.ads_id, p.name as product_name, p.brand, p.model, p.price
       FROM sales s
       JOIN clients c ON s.client_id = c.id
-      JOIN products p ON s.product_ads_id = p.ads_id
+      JOIN products p ON s.ads_id = p.ads_id
       ORDER BY s.sale_date DESC
     `);
 
