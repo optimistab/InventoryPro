@@ -13,8 +13,7 @@
     "restrict-users": "tsx scripts/restrictUsers.ts",
     "check-users": "tsx scripts/checkUsers.ts",
     "setup-production": "NODE_ENV=production tsx scripts/setupProduction.ts",
-    "db:setup": "tsx scripts/setupDatabase.ts",
-    "db:check": "tsx scripts/setupDatabaseDirect.ts",
+    "db:check": "tsx scripts/setupDatabaseDrizzle.ts",
     "db:migrate": "tsx scripts/setupDatabaseDrizzle.ts",
     "db:generate": "tsx scripts/generateMigration.ts",
     "deploy": "tsx scripts/deploy.ts"
