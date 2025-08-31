@@ -27,7 +27,7 @@ export default function RecoveryForm({ onSuccess, onCancel }: RecoveryFormProps)
   const form = useForm<InsertRecoveryItem>({
     resolver: zodResolver(insertRecoveryItemSchema),
     defaultValues: {
-      originalProductId: undefined,
+      adsId: undefined,
       clientId: undefined,
       brand: "",
       model: "",
@@ -196,11 +196,12 @@ export default function RecoveryForm({ onSuccess, onCancel }: RecoveryFormProps)
               <FormItem>
                 <FormLabel>Estimated Value ($)</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="number" 
-                    step="0.01" 
-                    placeholder="500.00" 
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="500.00"
                     {...field}
+                    value={field.value || ''}
                     onChange={(e) => field.onChange(e.target.value || undefined)}
                   />
                 </FormControl>
@@ -216,11 +217,12 @@ export default function RecoveryForm({ onSuccess, onCancel }: RecoveryFormProps)
               <FormItem>
                 <FormLabel>Repair Cost ($)</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="number" 
-                    step="0.01" 
-                    placeholder="150.00" 
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="150.00"
                     {...field}
+                    value={field.value || ''}
                     onChange={(e) => field.onChange(e.target.value || undefined)}
                   />
                 </FormControl>
@@ -237,10 +239,11 @@ export default function RecoveryForm({ onSuccess, onCancel }: RecoveryFormProps)
             <FormItem>
               <FormLabel>Notes</FormLabel>
               <FormControl>
-                <Textarea 
+                <Textarea
                   placeholder="Recovery details, repair notes, condition assessment..."
                   className="min-h-[80px]"
                   {...field}
+                  value={field.value || ''}
                 />
               </FormControl>
               <FormMessage />

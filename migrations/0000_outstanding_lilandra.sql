@@ -28,7 +28,7 @@ CREATE TABLE "clients" (
 --> statement-breakpoint
 CREATE TABLE "product_date_events" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"product_id" integer NOT NULL,
+	"ads_id" text NOT NULL,
 	"client_id" integer,
 	"event_type" text NOT NULL,
 	"event_date" text NOT NULL,
@@ -38,6 +38,8 @@ CREATE TABLE "product_date_events" (
 --> statement-breakpoint
 CREATE TABLE "products" (
 	"id" serial PRIMARY KEY NOT NULL,
+	"ads_id" text,
+	"reference_number" text,
 	"name" text NOT NULL,
 	"sku" text NOT NULL,
 	"brand" text NOT NULL,
@@ -50,12 +52,14 @@ CREATE TABLE "products" (
 	"specifications" text,
 	"description" text,
 	"is_active" boolean DEFAULT true NOT NULL,
-	CONSTRAINT "products_sku_unique" UNIQUE("sku")
+	CONSTRAINT "products_sku_unique" UNIQUE("sku"),
+	CONSTRAINT "products_ads_id_unique" UNIQUE("ads_id"),
+	CONSTRAINT "products_reference_number_unique" UNIQUE("reference_number")
 );
 --> statement-breakpoint
 CREATE TABLE "recovery_items" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"original_product_id" integer,
+	"ads_id" text,
 	"client_id" integer,
 	"brand" text NOT NULL,
 	"model" text NOT NULL,
@@ -70,7 +74,7 @@ CREATE TABLE "recovery_items" (
 CREATE TABLE "sales" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"client_id" integer NOT NULL,
-	"product_id" integer NOT NULL,
+	"ads_id" text NOT NULL,
 	"quantity" integer NOT NULL,
 	"unit_price" numeric(10, 2) NOT NULL,
 	"total_amount" numeric(10, 2) NOT NULL,

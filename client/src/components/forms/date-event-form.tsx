@@ -11,18 +11,18 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 interface DateEventFormProps {
-  productId: number;
+  adsId: string;
   onSuccess?: () => void;
 }
 
-export default function DateEventForm({ productId, onSuccess }: DateEventFormProps) {
+export default function DateEventForm({ adsId, onSuccess }: DateEventFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const form = useForm<InsertProductDateEvent>({
     resolver: zodResolver(insertProductDateEventSchema),
     defaultValues: {
-      productId,
+      adsId,
       eventDate: new Date().toISOString().split('T')[0],
       createdAt: new Date().toISOString(),
     },
@@ -32,10 +32,10 @@ export default function DateEventForm({ productId, onSuccess }: DateEventFormPro
     mutationFn: (data: InsertProductDateEvent) => 
       apiRequest("/api/product-date-events", "POST", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/product-date-events/product/${productId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/product-date-events/product/${adsId}`] });
       queryClient.invalidateQueries({ queryKey: ["/api/product-date-events"] });
       form.reset({
-        productId,
+        adsId,
         eventDate: new Date().toISOString().split('T')[0],
         createdAt: new Date().toISOString(),
       });

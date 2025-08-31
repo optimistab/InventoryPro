@@ -145,21 +145,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
             continue;
           }
 
-          // Validate data types
-          if (isNaN(productData.price) || productData.price < 0) {
+          // Validate and convert data types
+          const price = parseFloat(productData.price);
+          const cost = parseFloat(productData.cost);
+          const stockQuantity = productData.stockQuantity;
+
+          if (isNaN(price) || price < 0) {
             errors.push(`Row ${i + 1}: Invalid price`);
             continue;
           }
 
-          if (isNaN(productData.cost) || productData.cost < 0) {
+          if (isNaN(cost) || cost < 0) {
             errors.push(`Row ${i + 1}: Invalid cost`);
             continue;
           }
 
-          if (isNaN(productData.stockQuantity) || productData.stockQuantity < 0) {
+          if (isNaN(stockQuantity) || stockQuantity < 0) {
             errors.push(`Row ${i + 1}: Invalid stock quantity`);
             continue;
           }
+
+          // Update the product data with properly typed values
+          productData.price = price.toFixed(2);
+          productData.cost = cost.toFixed(2);
+          productData.stockQuantity = stockQuantity;
 
           // Validate category and condition
           if (!['laptop', 'desktop'].includes(productData.category)) {
@@ -242,13 +251,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/products", async (req, res) => {
     try {
-      const productData = insertProductSchema.parse(req.body);
+      // Preprocess the data to ensure correct types
+      const rawData = req.body;
+      const processedData = {
+        ...rawData,
+        // Ensure price and cost are valid decimal strings
+        price: (() => {
+          const price = rawData.price;
+          if (typeof price === 'string') return price;
+          if (typeof price === 'number') return price.toString();
+          return '0';
+        })(),
+        cost: (() => {
+          const cost = rawData.cost;
+          if (typeof cost === 'string') return cost;
+          if (typeof cost === 'number') return cost.toString();
+          return '0';
+        })(),
+        stockQuantity: (() => {
+          if (typeof rawData.stockQuantity === 'number') return rawData.stockQuantity;
+          if (typeof rawData.stockQuantity === 'string') {
+            const parsed = parseInt(rawData.stockQuantity);
+            return isNaN(parsed) ? 0 : parsed;
+          }
+          return 0;
+        })(),
+        isActive: rawData.isActive !== undefined ? Boolean(rawData.isActive) : true,
+      };
+
+      console.log('Raw data:', rawData);
+      console.log('Processed data:', processedData);
+
+      const productData = insertProductSchema.parse(processedData);
       const product = await storage.createProduct(productData);
 
-      
+
       // Automatically track product addition date
       await storage.createProductDateEvent({
-        productId: product.id,
+        adsId: product.adsId,
         eventType: EVENT_TYPES.PRODUCT_ADDED,
         eventDate: new Date().toISOString(),
         notes: `Product ${product.name} added to inventory`,
@@ -258,21 +298,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.status(201).json(product);
     } catch (error) {
-      res.status(400).json({ message: "POST Invalid product data" });
+      console.error('Validation error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown validation error';
+      res.status(400).json({
+        message: "POST Invalid product data",
+        error: errorMessage,
+        details: error instanceof Error && 'issues' in error ? error.issues : undefined
+      });
     }
   });
 
   app.put("/api/products/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const productData = insertProductSchema.partial().parse(req.body);
+
+      // Preprocess the data to ensure correct types
+      const rawData = req.body;
+      const processedData = {
+        ...rawData,
+        price: rawData.price !== undefined ? (() => {
+          const price = rawData.price;
+          if (typeof price === 'string') return price;
+          if (typeof price === 'number') return price.toString();
+          return undefined;
+        })() : undefined,
+        cost: rawData.cost !== undefined ? (() => {
+          const cost = rawData.cost;
+          if (typeof cost === 'string') return cost;
+          if (typeof cost === 'number') return cost.toString();
+          return undefined;
+        })() : undefined,
+        stockQuantity: rawData.stockQuantity !== undefined ? (() => {
+          if (typeof rawData.stockQuantity === 'number') return rawData.stockQuantity;
+          if (typeof rawData.stockQuantity === 'string') {
+            const parsed = parseInt(rawData.stockQuantity);
+            return isNaN(parsed) ? undefined : parsed;
+          }
+          return undefined;
+        })() : undefined,
+        isActive: rawData.isActive !== undefined ? Boolean(rawData.isActive) : undefined,
+      };
+
+      console.log('PUT Raw data:', rawData);
+      console.log('PUT Processed data:', processedData);
+
+      const productData = insertProductSchema.partial().parse(processedData);
       const product = await storage.updateProduct(id, productData);
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
       res.json(product);
     } catch (error) {
-      res.status(400).json({ message: " PUT Invalid product data" });
+      console.error('PUT Validation error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown validation error';
+      res.status(400).json({
+        message: "PUT Invalid product data",
+        error: errorMessage,
+        details: error instanceof Error && 'issues' in error ? error.issues : undefined
+      });
     }
   });
 
@@ -378,13 +461,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const sale = await storage.createSale(saleData);
       
       // Get product to check if this is first sale or resale
-      const product = await storage.getProduct(sale.productId);
-      const existingSales = await storage.getSalesByProduct(sale.productId);
+      const product = await storage.getProductByAdsId(sale.adsId);
+      const existingSales = await storage.getSalesByProduct(sale.adsId);
       const isFirstSale = existingSales.length === 1; // Just created this sale
-      
+
       // Automatically track sale event
       await storage.createProductDateEvent({
-        productId: sale.productId,
+        adsId: sale.adsId,
         clientId: sale.clientId,
         eventType: isFirstSale ? EVENT_TYPES.FIRST_SALE : EVENT_TYPES.RESALE_TO_CUSTOMER,
         eventDate: sale.saleDate,
@@ -461,9 +544,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const item = await storage.createRecoveryItem(itemData);
       
       // Automatically track recovery event
-      if (item.originalProductId) {
+      if (item.adsId) {
         await storage.createProductDateEvent({
-          productId: item.originalProductId,
+          adsId: item.adsId,
           clientId: item.clientId || undefined,
           eventType: EVENT_TYPES.RECOVERY_RECEIVED,
           eventDate: item.recoveryDate,
@@ -488,10 +571,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get("/api/product-date-events/product/:productId", async (req, res) => {
+  app.get("/api/product-date-events/product/:adsId", async (req, res) => {
     try {
-      const productId = parseInt(req.params.productId);
-      const events = await storage.getProductDateEventsByProduct(productId);
+      const adsId = req.params.adsId;
+      const events = await storage.getProductDateEventsByProduct(adsId);
       res.json(events);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch product date events" });

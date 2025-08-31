@@ -15,15 +15,77 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 export default function Dashboard() {
   const [isProductFormOpen, setIsProductFormOpen] = useState(false);
 
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats, isLoading: statsLoading } = useQuery<{
+    totalInventory: number;
+    monthlySales: number;
+    activeClients: number;
+    recoveryItems: number;
+    salesGrowth: number;
+    clientGrowth: number;
+  }>({
     queryKey: ["/api/dashboard/stats"],
   });
 
-  const { data: sales, isLoading: salesLoading } = useQuery({
+  const { data: sales, isLoading: salesLoading } = useQuery<{
+    id: number;
+    clientId: number;
+    adsId: string;
+    quantity: number;
+    unitPrice: string;
+    totalAmount: string;
+    saleDate: string;
+    status: string;
+    notes: string | null;
+    client: {
+      id: number;
+      name: string;
+      email: string;
+      phone: string | null;
+      address: string | null;
+      city: string | null;
+      state: string | null;
+      zipCode: string | null;
+      company: string | null;
+      isActive: boolean;
+    };
+    product: {
+      id: number;
+      adsId: string;
+      referenceNumber: string;
+      name: string;
+      sku: string;
+      brand: string;
+      model: string;
+      category: string;
+      condition: string;
+      price: string;
+      cost: string;
+      stockQuantity: number;
+      specifications: string | null;
+      description: string | null;
+      isActive: boolean;
+    };
+  }[]>({
     queryKey: ["/api/sales"],
   });
 
-  const { data: products, isLoading: productsLoading } = useQuery({
+  const { data: products, isLoading: productsLoading } = useQuery<{
+    id: number;
+    adsId: string;
+    referenceNumber: string;
+    name: string;
+    sku: string;
+    brand: string;
+    model: string;
+    category: string;
+    condition: string;
+    price: string;
+    cost: string;
+    stockQuantity: number;
+    specifications: string | null;
+    description: string | null;
+    isActive: boolean;
+  }[]>({
     queryKey: ["/api/products"],
   });
 

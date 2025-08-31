@@ -17,23 +17,23 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProductTimelineProps {
-  productId: number;
+  adsId: string;
   productName?: string;
 }
 
-export default function ProductTimeline({ productId, productName }: ProductTimelineProps) {
+export default function ProductTimeline({ adsId, productName }: ProductTimelineProps) {
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: events, isLoading } = useQuery<ProductDateEvent[]>({
-    queryKey: [`/api/product-date-events/product/${productId}`],
+    queryKey: [`/api/product-date-events/product/${adsId}`],
   });
 
   const form = useForm<InsertProductDateEvent>({
     resolver: zodResolver(insertProductDateEventSchema),
     defaultValues: {
-      productId,
+      adsId,
       eventDate: new Date().toISOString().split('T')[0],
       createdAt: new Date().toISOString(),
     },
@@ -43,10 +43,10 @@ export default function ProductTimeline({ productId, productName }: ProductTimel
     mutationFn: (data: InsertProductDateEvent) => 
       apiRequest("/api/product-date-events", "POST", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/product-date-events/product/${productId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/product-date-events/product/${adsId}`] });
       setIsAddEventOpen(false);
       form.reset({
-        productId,
+        adsId,
         eventDate: new Date().toISOString().split('T')[0],
         createdAt: new Date().toISOString(),
       });

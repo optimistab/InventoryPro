@@ -6,8 +6,6 @@ import pgSession from "connect-pg-simple";
 import pool from "../db"; // your pg Pool
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import setupDatabaseDrizzle from "../scripts/setupDatabaseDrizzle";
-import { createUsersIfNeeded } from "../scripts/createUsers";
 
 const app = express();
 const PgSession = pgSession(session);
@@ -68,30 +66,10 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Set up database with Drizzle migrations before starting the server
-  try {
-    console.log(" setupDatabaseDrizzle START --")
-    await setupDatabaseDrizzle();
-    console.log(" setupDatabaseDrizzle END --")
-    log('✅ Database setup with Drizzle migrations completed');
-  } catch (error) {
-    console.error('❌ Database setup with Drizzle migrations failed:', error);
-    log('⚠️  Database setup failed, but continuing...');
-  }
-
-  // Create users automatically if they don't exist (for first deployment)
-  // Add a small delay to ensure database schema is fully ready
-  setTimeout(async () => {
-    try {
-      console.log("👥 Checking and creating users if needed...");
-      await createUsersIfNeeded();
-      log('✅ User setup completed');
-    } catch (error) {
-      console.error('❌ User setup failed:', error);
-      log('⚠️  User setup failed, but application will continue...');
-      // Don't let user creation errors crash the app
-    }
-  }, 2000); // Removed .unref() to keep the process alive
+  // Database setup is now handled by the reset script
+  // No additional setup needed since we reset everything on startup
+  console.log("📊 Database setup handled by reset script - no additional setup needed");
+  log('✅ Database setup completed via reset script');
   
   console.log("Registering routes...");
   const server = await registerRoutes(app);

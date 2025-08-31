@@ -8,15 +8,15 @@ async function setupProduction() {
   console.log('🚀 Setting up production environment...');
   
   try {
-    // Step 1: Set up database schema with Drizzle migrations
-    console.log('📦 Step 1: Setting up database schema with Drizzle migrations...');
-    
+    // Step 1: Reset database to erase all data
+    console.log('📦 Step 1: Resetting database to erase all data...');
+
     try {
-      execSync('npm run db:migrate', { stdio: 'inherit' });
-      console.log('✅ Database schema setup completed!');
-    } catch (migrationError) {
-      console.log('⚠️  Database schema setup failed, but continuing...');
-      console.log('💡 This is normal if all tables already exist');
+      execSync('npm run db:reset', { stdio: 'inherit' });
+      console.log('✅ Database reset completed!');
+    } catch (resetError) {
+      console.log('⚠️  Database reset failed, but continuing...');
+      console.log('💡 This might happen if database is not accessible');
     }
     
     // Step 2: Build the application

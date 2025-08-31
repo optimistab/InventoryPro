@@ -44,15 +44,15 @@ export const clients = pgTable("clients", {
 
 // Sales table
 export const sales = pgTable("sales", {
-  id: serial("id").primaryKey(),
-  clientId: integer("client_id").notNull(),
-  productId: integer("product_id").notNull(),
-  quantity: integer("quantity").notNull(),
-  unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
-  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
-  saleDate: text("sale_date").notNull(), // ISO date string
-  status: text("status").notNull().default("completed"), // "pending", "completed", "cancelled"
-  notes: text("notes"),
+   id: serial("id").primaryKey(),
+   clientId: integer("client_id").notNull(),
+   adsId: text("ads_id").notNull(), // Reference to products.adsId
+   quantity: integer("quantity").notNull(),
+   unitPrice: decimal("unit_price", { precision: 10, scale: 2 }).notNull(),
+   totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+   saleDate: text("sale_date").notNull(), // ISO date string
+   status: text("status").notNull().default("completed"), // "pending", "completed", "cancelled"
+   notes: text("notes"),
 });
 
 // Client requirements tracking
@@ -72,13 +72,13 @@ export const clientRequirements = pgTable("client_requirements", {
 
 // Product lifecycle date tracking
 export const productDateEvents = pgTable("product_date_events", {
-  id: serial("id").primaryKey(),
-  productId: integer("product_id").notNull(),
-  clientId: integer("client_id"), // optional, for customer-related events
-  eventType: text("event_type").notNull(), // see EVENT_TYPES constant below
-  eventDate: text("event_date").notNull(), // ISO date string
-  notes: text("notes"),
-  createdAt: text("created_at").notNull(),
+    id: serial("id").primaryKey(),
+    adsId: text("ads_id").notNull(), // Reference to products.adsId
+    clientId: integer("client_id"), // optional, for customer-related events
+    eventType: text("event_type").notNull(), // see EVENT_TYPES constant below
+    eventDate: text("event_date").notNull(), // ISO date string
+    notes: text("notes"),
+    createdAt: text("created_at").notNull(),
 });
 
 // Event types for product lifecycle tracking
@@ -100,17 +100,17 @@ export const EVENT_TYPES = {
 
 // Recovery information for refurbished items
 export const recoveryItems = pgTable("recovery_items", {
-  id: serial("id").primaryKey(),
-  originalProductId: integer("original_product_id"),
-  clientId: integer("client_id"),
-  brand: text("brand").notNull(),
-  model: text("model").notNull(),
-  condition: text("condition").notNull(), // "working", "repairable", "parts-only"
-  recoveryDate: text("recovery_date").notNull(),
-  estimatedValue: decimal("estimated_value", { precision: 10, scale: 2 }),
-  repairCost: decimal("repair_cost", { precision: 10, scale: 2 }),
-  status: text("status").notNull().default("received"), // "received", "repairing", "ready", "sold"
-  notes: text("notes"),
+    id: serial("id").primaryKey(),
+    adsId: text("ads_id"), // Reference to products.adsId
+    clientId: integer("client_id"),
+    brand: text("brand").notNull(),
+    model: text("model").notNull(),
+    condition: text("condition").notNull(), // "working", "repairable", "parts-only"
+    recoveryDate: text("recovery_date").notNull(),
+    estimatedValue: decimal("estimated_value", { precision: 10, scale: 2 }),
+    repairCost: decimal("repair_cost", { precision: 10, scale: 2 }),
+    status: text("status").notNull().default("received"), // "received", "repairing", "ready", "sold"
+    notes: text("notes"),
 });
 
 // Users table
@@ -129,6 +129,7 @@ export const insertProductSchema = createInsertSchema(products).omit({
   adsId: true,
   referenceNumber: true,
 });
+
 
 export const insertClientSchema = createInsertSchema(clients).omit({
   id: true,
@@ -175,6 +176,7 @@ export type InsertProductDateEvent = z.infer<typeof insertProductDateEventSchema
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+
 
 // Extended types for joins
 export type SaleWithDetails = Sale & {

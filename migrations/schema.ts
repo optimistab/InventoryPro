@@ -34,7 +34,7 @@ export const clients = pgTable("clients", {
 
 export const productDateEvents = pgTable("product_date_events", {
 	id: serial().primaryKey().notNull(),
-	productId: integer("product_id").notNull(),
+	adsId: text("ads_id").notNull(),
 	clientId: integer("client_id"),
 	eventType: text("event_type").notNull(),
 	eventDate: text("event_date").notNull(),
@@ -65,7 +65,7 @@ export const products = pgTable("products", {
 
 export const recoveryItems = pgTable("recovery_items", {
 	id: serial().primaryKey().notNull(),
-	originalProductId: integer("original_product_id"),
+	adsId: text("ads_id"),
 	clientId: integer("client_id"),
 	brand: text().notNull(),
 	model: text().notNull(),
@@ -80,7 +80,7 @@ export const recoveryItems = pgTable("recovery_items", {
 export const sales = pgTable("sales", {
 	id: serial().primaryKey().notNull(),
 	clientId: integer("client_id").notNull(),
-	productId: integer("product_id").notNull(),
+	adsId: text("ads_id").notNull(),
 	quantity: integer().notNull(),
 	unitPrice: numeric("unit_price", { precision: 10, scale:  2 }).notNull(),
 	totalAmount: numeric("total_amount", { precision: 10, scale:  2 }).notNull(),

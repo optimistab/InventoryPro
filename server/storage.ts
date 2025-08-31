@@ -34,7 +34,7 @@ export interface IStorage {
   getSalesWithDetails(): Promise<SaleWithDetails[]>;
   getSale(id: number): Promise<Sale | undefined>;
   getSalesByClient(clientId: number): Promise<Sale[]>;
-  getSalesByProduct(productId: number): Promise<Sale[]>;
+  getSalesByProduct(adsId: string): Promise<Sale[]>;
   createSale(sale: InsertSale): Promise<Sale>;
   updateSale(id: number, sale: Partial<InsertSale>): Promise<Sale | undefined>;
   deleteSale(id: number): Promise<boolean>;
@@ -56,7 +56,7 @@ export interface IStorage {
 
   // Product Date Events
   getProductDateEvents(): Promise<ProductDateEvent[]>;
-  getProductDateEventsByProduct(productId: number): Promise<ProductDateEvent[]>;
+  getProductDateEventsByProduct(adsId: string): Promise<ProductDateEvent[]>;
   getProductDateEvent(id: number): Promise<ProductDateEvent | undefined>;
   createProductDateEvent(event: InsertProductDateEvent): Promise<ProductDateEvent>;
   updateProductDateEvent(id: number, event: Partial<InsertProductDateEvent>): Promise<ProductDateEvent | undefined>;
@@ -76,20 +76,6 @@ export interface IStorage {
 }
 
 export class PostgresStorage implements IStorage {
-
-  private clients = new Map<number, Client>();
-  private products = new Map<number, Product>();
-  private sales = new Map<number, Sale>();
-  private clientRequirements = new Map<number, ClientRequirement>();
-  private recoveryItems = new Map<number, RecoveryItem>();
-  private productDateEvents = new Map<number, ProductDateEvent>();
-
-  private currentClientId = 1;
-  private currentProductId = 1;
-  private currentSaleId = 1;
-  private currentRequirementId = 1;
-  private currentRecoveryId = 1;
-  private currentDateEventId = 1;
 
   // Products
   async getProducts(): Promise<Product[]> {
@@ -280,10 +266,10 @@ export class PostgresStorage implements IStorage {
           // Create product date event for updated product
           await client.query(
             `INSERT INTO product_date_events
-              (product_id, event_type, event_date, notes, created_at)
+              (product_ads_id, event_type, event_date, notes, created_at)
              VALUES ($1, $2, $3, $4, $5)`,
             [
-              updatedProduct.id,
+              updatedProduct.adsId,
               'product_updated',
               new Date().toISOString(),
               `Product ${updatedProduct.name} updated via bulk upload`,
@@ -346,10 +332,10 @@ export class PostgresStorage implements IStorage {
           // Create product date event for new product
           await client.query(
             `INSERT INTO product_date_events
-              (product_id, event_type, event_date, notes, created_at)
+              (product_ads_id, event_type, event_date, notes, created_at)
              VALUES ($1, $2, $3, $4, $5)`,
             [
-              createdProduct.id,
+              createdProduct.adsId,
               'product_added',
               new Date().toISOString(),
               `Product ${createdProduct.name} added to inventory via bulk upload`,
@@ -490,192 +476,599 @@ export class PostgresStorage implements IStorage {
 
   // Clients
   async getClients(): Promise<Client[]> {
-    return Array.from(this.clients.values()).filter(c => c.isActive);
+    const res = await pool.query("SELECT * FROM clients WHERE is_active = TRUE ORDER BY name");
+    return res.rows.map(row => ({
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      phone: row.phone,
+      address: row.address,
+      city: row.city,
+      state: row.state,
+      zipCode: row.zip_code,
+      company: row.company,
+      isActive: row.is_active
+    }));
   }
 
   async getClient(id: number): Promise<Client | undefined> {
-    return this.clients.get(id);
+    const res = await pool.query("SELECT * FROM clients WHERE id = $1", [id]);
+    if (res.rows.length === 0) return undefined;
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      phone: row.phone,
+      address: row.address,
+      city: row.city,
+      state: row.state,
+      zipCode: row.zip_code,
+      company: row.company,
+      isActive: row.is_active
+    };
   }
 
   async getClientByEmail(email: string): Promise<Client | undefined> {
-    return Array.from(this.clients.values()).find(c => c.email === email);
+    const res = await pool.query("SELECT * FROM clients WHERE email = $1", [email]);
+    if (res.rows.length === 0) return undefined;
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      phone: row.phone,
+      address: row.address,
+      city: row.city,
+      state: row.state,
+      zipCode: row.zip_code,
+      company: row.company,
+      isActive: row.is_active
+    };
   }
 
   async createClient(insertClient: InsertClient): Promise<Client> {
-    const id = this.currentClientId++;
-    const client: Client = { 
-      ...insertClient, 
-      id,
-      phone: insertClient.phone ?? null,
-      address: insertClient.address ?? null,
-      city: insertClient.city ?? null,
-      state: insertClient.state ?? null,
-      zipCode: insertClient.zipCode ?? null,
-      company: insertClient.company ?? null,
-      isActive: insertClient.isActive ?? true
+    const res = await pool.query(
+      `INSERT INTO clients
+        (name, email, phone, address, city, state, zip_code, company, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING *`,
+      [
+        insertClient.name,
+        insertClient.email,
+        insertClient.phone ?? null,
+        insertClient.address ?? null,
+        insertClient.city ?? null,
+        insertClient.state ?? null,
+        insertClient.zipCode ?? null,
+        insertClient.company ?? null,
+        insertClient.isActive ?? true
+      ]
+    );
+
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      phone: row.phone,
+      address: row.address,
+      city: row.city,
+      state: row.state,
+      zipCode: row.zip_code,
+      company: row.company,
+      isActive: row.is_active
     };
-    this.clients.set(id, client);
-    return client;
   }
 
   async updateClient(id: number, clientUpdate: Partial<InsertClient>): Promise<Client | undefined> {
-    const existing = this.clients.get(id);
-    if (!existing) return undefined;
-    
-    const updated: Client = { ...existing, ...clientUpdate };
-    this.clients.set(id, updated);
-    return updated;
+    // Build dynamic SET clause
+    const fields = [];
+    const values = [];
+    let idx = 1;
+    for (const [key, value] of Object.entries(clientUpdate)) {
+      if (key === "zipCode") {
+        fields.push(`zip_code = $${idx++}`);
+        values.push(value);
+      } else if (key === "isActive") {
+        fields.push(`is_active = $${idx++}`);
+        values.push(value);
+      } else {
+        fields.push(`${key} = $${idx++}`);
+        values.push(value);
+      }
+    }
+    if (fields.length === 0) return this.getClient(id);
+    values.push(id);
+    const sql = `UPDATE clients SET ${fields.join(", ")} WHERE id = $${values.length} RETURNING *`;
+    const res = await pool.query(sql, values);
+    if (res.rows.length === 0) return undefined;
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      phone: row.phone,
+      address: row.address,
+      city: row.city,
+      state: row.state,
+      zipCode: row.zip_code,
+      company: row.company,
+      isActive: row.is_active
+    };
   }
 
   async deleteClient(id: number): Promise<boolean> {
-    return this.clients.delete(id);
+    const res = await pool.query("DELETE FROM clients WHERE id = $1", [id]);
+    return (res.rowCount ?? 0) > 0;
   }
 
   // Sales
   async getSales(): Promise<Sale[]> {
-    return Array.from(this.sales.values());
+    const res = await pool.query("SELECT * FROM sales ORDER BY sale_date DESC");
+    return res.rows.map(row => ({
+      id: row.id,
+      clientId: row.client_id,
+      adsId: row.ads_id,
+      quantity: row.quantity,
+      unitPrice: row.unit_price,
+      totalAmount: row.total_amount,
+      saleDate: row.sale_date,
+      status: row.status,
+      notes: row.notes
+    }));
   }
 
   async getSalesWithDetails(): Promise<SaleWithDetails[]> {
-    const sales = Array.from(this.sales.values());
-    const salesWithDetails: SaleWithDetails[] = [];
-    
-    for (const sale of sales) {
-      const client = this.clients.get(sale.clientId);
-      const product = this.products.get(sale.productId);
-      
-      if (client && product) {
-        salesWithDetails.push({ ...sale, client, product });
+    const res = await pool.query(`
+      SELECT
+        s.*,
+        c.name as client_name, c.email as client_email,
+        p.ads_id, p.name as product_name, p.brand, p.model, p.price
+      FROM sales s
+      JOIN clients c ON s.client_id = c.id
+      JOIN products p ON s.product_ads_id = p.ads_id
+      ORDER BY s.sale_date DESC
+    `);
+
+    return res.rows.map(row => ({
+      id: row.id,
+      clientId: row.client_id,
+      adsId: row.ads_id,
+      quantity: row.quantity,
+      unitPrice: row.unit_price,
+      totalAmount: row.total_amount,
+      saleDate: row.sale_date,
+      status: row.status,
+      notes: row.notes,
+      client: {
+        id: row.client_id,
+        name: row.client_name,
+        email: row.client_email,
+        phone: null,
+        address: null,
+        city: null,
+        state: null,
+        zipCode: null,
+        company: null,
+        isActive: true
+      },
+      product: {
+        id: 0, // Not used with adsId
+        adsId: row.ads_id,
+        referenceNumber: `ADS${row.ads_id}`,
+        name: row.product_name,
+        sku: '',
+        brand: row.brand,
+        model: row.model,
+        category: '',
+        condition: '',
+        price: row.price,
+        cost: '0',
+        stockQuantity: 0,
+        specifications: null,
+        description: null,
+        isActive: true
       }
-    }
-    
-    return salesWithDetails.sort((a, b) => new Date(b.saleDate).getTime() - new Date(a.saleDate).getTime());
+    }));
   }
 
   async getSale(id: number): Promise<Sale | undefined> {
-    return this.sales.get(id);
+    const res = await pool.query("SELECT * FROM sales WHERE id = $1", [id]);
+    if (res.rows.length === 0) return undefined;
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      clientId: row.client_id,
+      adsId: row.ads_id,
+      quantity: row.quantity,
+      unitPrice: row.unit_price,
+      totalAmount: row.total_amount,
+      saleDate: row.sale_date,
+      status: row.status,
+      notes: row.notes
+    };
   }
 
   async getSalesByClient(clientId: number): Promise<Sale[]> {
-    return Array.from(this.sales.values()).filter(s => s.clientId === clientId);
+    const res = await pool.query("SELECT * FROM sales WHERE client_id = $1 ORDER BY sale_date DESC", [clientId]);
+    return res.rows.map(row => ({
+      id: row.id,
+      clientId: row.client_id,
+      adsId: row.ads_id,
+      quantity: row.quantity,
+      unitPrice: row.unit_price,
+      totalAmount: row.total_amount,
+      saleDate: row.sale_date,
+      status: row.status,
+      notes: row.notes
+    }));
   }
 
-  async getSalesByProduct(productId: number): Promise<Sale[]> {
-    return Array.from(this.sales.values()).filter(s => s.productId === productId);
+  async getSalesByProduct(adsId: string): Promise<Sale[]> {
+    const res = await pool.query("SELECT * FROM sales WHERE ads_id = $1 ORDER BY sale_date DESC", [adsId]);
+    return res.rows.map(row => ({
+      id: row.id,
+      clientId: row.client_id,
+      adsId: row.ads_id,
+      quantity: row.quantity,
+      unitPrice: row.unit_price,
+      totalAmount: row.total_amount,
+      saleDate: row.sale_date,
+      status: row.status,
+      notes: row.notes
+    }));
   }
 
   async createSale(insertSale: InsertSale): Promise<Sale> {
-    const id = this.currentSaleId++;
-    const sale: Sale = { 
-      ...insertSale, 
-      id,
-      notes: insertSale.notes ?? null,
-      status: insertSale.status ?? "completed"
+    const res = await pool.query(
+      `INSERT INTO sales
+        (client_id, ads_id, quantity, unit_price, total_amount, sale_date, status, notes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING *`,
+      [
+        insertSale.clientId,
+        insertSale.adsId,
+        insertSale.quantity,
+        insertSale.unitPrice,
+        insertSale.totalAmount,
+        insertSale.saleDate,
+        insertSale.status ?? "completed",
+        insertSale.notes ?? null
+      ]
+    );
+
+    const row = res.rows[0];
+    const sale: Sale = {
+      id: row.id,
+      clientId: row.client_id,
+      adsId: row.ads_id,
+      quantity: row.quantity,
+      unitPrice: row.unit_price,
+      totalAmount: row.total_amount,
+      saleDate: row.sale_date,
+      status: row.status,
+      notes: row.notes
     };
-    this.sales.set(id, sale);
-    
+
     // Update product stock
-    const product = this.products.get(sale.productId);
-    if (product) {
-      const updatedProduct = { ...product, stockQuantity: product.stockQuantity - sale.quantity };
-      this.products.set(product.id, updatedProduct);
-    }
-    
+    await pool.query(
+      "UPDATE products SET stock_quantity = stock_quantity - $1 WHERE ads_id = $2",
+      [sale.quantity, sale.adsId]
+    );
+
     return sale;
   }
 
   async updateSale(id: number, saleUpdate: Partial<InsertSale>): Promise<Sale | undefined> {
-    const existing = this.sales.get(id);
-    if (!existing) return undefined;
-    
-    const updated: Sale = { ...existing, ...saleUpdate };
-    this.sales.set(id, updated);
-    return updated;
+    // Build dynamic SET clause
+    const fields = [];
+    const values = [];
+    let idx = 1;
+    for (const [key, value] of Object.entries(saleUpdate)) {
+      if (key === "adsId") {
+        fields.push(`ads_id = $${idx++}`);
+        values.push(value);
+      } else if (key === "unitPrice") {
+        fields.push(`unit_price = $${idx++}`);
+        values.push(value);
+      } else if (key === "totalAmount") {
+        fields.push(`total_amount = $${idx++}`);
+        values.push(value);
+      } else if (key === "saleDate") {
+        fields.push(`sale_date = $${idx++}`);
+        values.push(value);
+      } else {
+        fields.push(`${key} = $${idx++}`);
+        values.push(value);
+      }
+    }
+    if (fields.length === 0) return this.getSale(id);
+    values.push(id);
+    const sql = `UPDATE sales SET ${fields.join(", ")} WHERE id = $${values.length} RETURNING *`;
+    const res = await pool.query(sql, values);
+    if (res.rows.length === 0) return undefined;
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      clientId: row.client_id,
+      adsId: row.ads_id,
+      quantity: row.quantity,
+      unitPrice: row.unit_price,
+      totalAmount: row.total_amount,
+      saleDate: row.sale_date,
+      status: row.status,
+      notes: row.notes
+    };
   }
 
   async deleteSale(id: number): Promise<boolean> {
-    return this.sales.delete(id);
+    const res = await pool.query("DELETE FROM sales WHERE id = $1", [id]);
+    return (res.rowCount ?? 0) > 0;
   }
 
   // Client Requirements
   async getClientRequirements(): Promise<ClientRequirement[]> {
-    return Array.from(this.clientRequirements.values());
+    const res = await pool.query("SELECT * FROM client_requirements ORDER BY created_date DESC");
+    return res.rows.map(row => ({
+      id: row.id,
+      clientId: row.client_id,
+      productCategory: row.product_category,
+      specifications: row.specifications,
+      budgetMin: row.budget_min,
+      budgetMax: row.budget_max,
+      timeframe: row.timeframe,
+      priority: row.priority,
+      status: row.status,
+      notes: row.notes,
+      createdDate: row.created_date
+    }));
   }
 
   async getClientRequirement(id: number): Promise<ClientRequirement | undefined> {
-    return this.clientRequirements.get(id);
+    const res = await pool.query("SELECT * FROM client_requirements WHERE id = $1", [id]);
+    if (res.rows.length === 0) return undefined;
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      clientId: row.client_id,
+      productCategory: row.product_category,
+      specifications: row.specifications,
+      budgetMin: row.budget_min,
+      budgetMax: row.budget_max,
+      timeframe: row.timeframe,
+      priority: row.priority,
+      status: row.status,
+      notes: row.notes,
+      createdDate: row.created_date
+    };
   }
 
   async getClientRequirementsByClient(clientId: number): Promise<ClientRequirement[]> {
-    return Array.from(this.clientRequirements.values()).filter(r => r.clientId === clientId);
+    const res = await pool.query("SELECT * FROM client_requirements WHERE client_id = $1 ORDER BY created_date DESC", [clientId]);
+    return res.rows.map(row => ({
+      id: row.id,
+      clientId: row.client_id,
+      productCategory: row.product_category,
+      specifications: row.specifications,
+      budgetMin: row.budget_min,
+      budgetMax: row.budget_max,
+      timeframe: row.timeframe,
+      priority: row.priority,
+      status: row.status,
+      notes: row.notes,
+      createdDate: row.created_date
+    }));
   }
 
   async createClientRequirement(insertRequirement: InsertClientRequirement): Promise<ClientRequirement> {
-    const id = this.currentRequirementId++;
-    const requirement: ClientRequirement = { 
-      ...insertRequirement, 
-      id,
-      specifications: insertRequirement.specifications ?? null,
-      budgetMin: insertRequirement.budgetMin ?? null,
-      budgetMax: insertRequirement.budgetMax ?? null,
-      timeframe: insertRequirement.timeframe ?? null,
-      notes: insertRequirement.notes ?? null,
-      status: insertRequirement.status ?? "pending",
-      priority: insertRequirement.priority ?? "medium"
+    const res = await pool.query(
+      `INSERT INTO client_requirements
+        (client_id, product_category, specifications, budget_min, budget_max, timeframe, priority, status, notes, created_date)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       RETURNING *`,
+      [
+        insertRequirement.clientId,
+        insertRequirement.productCategory,
+        insertRequirement.specifications ?? null,
+        insertRequirement.budgetMin ?? null,
+        insertRequirement.budgetMax ?? null,
+        insertRequirement.timeframe ?? null,
+        insertRequirement.priority ?? "medium",
+        insertRequirement.status ?? "active",
+        insertRequirement.notes ?? null,
+        insertRequirement.createdDate ?? new Date().toISOString()
+      ]
+    );
+
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      clientId: row.client_id,
+      productCategory: row.product_category,
+      specifications: row.specifications,
+      budgetMin: row.budget_min,
+      budgetMax: row.budget_max,
+      timeframe: row.timeframe,
+      priority: row.priority,
+      status: row.status,
+      notes: row.notes,
+      createdDate: row.created_date
     };
-    this.clientRequirements.set(id, requirement);
-    return requirement;
   }
 
   async updateClientRequirement(id: number, requirementUpdate: Partial<InsertClientRequirement>): Promise<ClientRequirement | undefined> {
-    const existing = this.clientRequirements.get(id);
-    if (!existing) return undefined;
-    
-    const updated: ClientRequirement = { ...existing, ...requirementUpdate };
-    this.clientRequirements.set(id, updated);
-    return updated;
+    // Build dynamic SET clause
+    const fields = [];
+    const values = [];
+    let idx = 1;
+    for (const [key, value] of Object.entries(requirementUpdate)) {
+      if (key === "budgetMin") {
+        fields.push(`budget_min = $${idx++}`);
+        values.push(value);
+      } else if (key === "budgetMax") {
+        fields.push(`budget_max = $${idx++}`);
+        values.push(value);
+      } else if (key === "productCategory") {
+        fields.push(`product_category = $${idx++}`);
+        values.push(value);
+      } else if (key === "createdDate") {
+        fields.push(`created_date = $${idx++}`);
+        values.push(value);
+      } else {
+        fields.push(`${key} = $${idx++}`);
+        values.push(value);
+      }
+    }
+    if (fields.length === 0) return this.getClientRequirement(id);
+    values.push(id);
+    const sql = `UPDATE client_requirements SET ${fields.join(", ")} WHERE id = $${values.length} RETURNING *`;
+    const res = await pool.query(sql, values);
+    if (res.rows.length === 0) return undefined;
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      clientId: row.client_id,
+      productCategory: row.product_category,
+      specifications: row.specifications,
+      budgetMin: row.budget_min,
+      budgetMax: row.budget_max,
+      timeframe: row.timeframe,
+      priority: row.priority,
+      status: row.status,
+      notes: row.notes,
+      createdDate: row.created_date
+    };
   }
 
   async deleteClientRequirement(id: number): Promise<boolean> {
-    return this.clientRequirements.delete(id);
+    const res = await pool.query("DELETE FROM client_requirements WHERE id = $1", [id]);
+    return (res.rowCount ?? 0) > 0;
   }
 
   // Recovery Items
   async getRecoveryItems(): Promise<RecoveryItem[]> {
-    return Array.from(this.recoveryItems.values());
+    const res = await pool.query("SELECT * FROM recovery_items ORDER BY recovery_date DESC");
+    return res.rows.map(row => ({
+      id: row.id,
+      adsId: row.ads_id,
+      clientId: row.client_id,
+      brand: row.brand,
+      model: row.model,
+      condition: row.condition,
+      recoveryDate: row.recovery_date,
+      estimatedValue: row.estimated_value,
+      repairCost: row.repair_cost,
+      status: row.status,
+      notes: row.notes
+    }));
   }
 
   async getRecoveryItem(id: number): Promise<RecoveryItem | undefined> {
-    return this.recoveryItems.get(id);
+    const res = await pool.query("SELECT * FROM recovery_items WHERE id = $1", [id]);
+    if (res.rows.length === 0) return undefined;
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      adsId: row.ads_id,
+      clientId: row.client_id,
+      brand: row.brand,
+      model: row.model,
+      condition: row.condition,
+      recoveryDate: row.recovery_date,
+      estimatedValue: row.estimated_value,
+      repairCost: row.repair_cost,
+      status: row.status,
+      notes: row.notes
+    };
   }
 
   async createRecoveryItem(insertItem: InsertRecoveryItem): Promise<RecoveryItem> {
-    const id = this.currentRecoveryId++;
-    const item: RecoveryItem = { 
-      ...insertItem, 
-      id,
-      originalProductId: insertItem.originalProductId ?? null,
-      clientId: insertItem.clientId ?? null,
-      estimatedValue: insertItem.estimatedValue ?? null,
-      repairCost: insertItem.repairCost ?? null,
-      notes: insertItem.notes ?? null,
-      status: insertItem.status ?? "pending"
+    const res = await pool.query(
+      `INSERT INTO recovery_items
+        (ads_id, client_id, brand, model, condition, recovery_date, estimated_value, repair_cost, status, notes)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+       RETURNING *`,
+      [
+        insertItem.adsId ?? null,
+        insertItem.clientId ?? null,
+        insertItem.brand,
+        insertItem.model,
+        insertItem.condition,
+        insertItem.recoveryDate,
+        insertItem.estimatedValue ?? null,
+        insertItem.repairCost ?? null,
+        insertItem.status ?? "received",
+        insertItem.notes ?? null
+      ]
+    );
+
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      adsId: row.ads_id,
+      clientId: row.client_id,
+      brand: row.brand,
+      model: row.model,
+      condition: row.condition,
+      recoveryDate: row.recovery_date,
+      estimatedValue: row.estimated_value,
+      repairCost: row.repair_cost,
+      status: row.status,
+      notes: row.notes
     };
-    this.recoveryItems.set(id, item);
-    return item;
   }
 
   async updateRecoveryItem(id: number, itemUpdate: Partial<InsertRecoveryItem>): Promise<RecoveryItem | undefined> {
-    const existing = this.recoveryItems.get(id);
-    if (!existing) return undefined;
-    
-    const updated: RecoveryItem = { ...existing, ...itemUpdate };
-    this.recoveryItems.set(id, updated);
-    return updated;
+    // Build dynamic SET clause
+    const fields = [];
+    const values = [];
+    let idx = 1;
+    for (const [key, value] of Object.entries(itemUpdate)) {
+      if (key === "adsId") {
+        fields.push(`ads_id = $${idx++}`);
+        values.push(value);
+      } else if (key === "clientId") {
+        fields.push(`client_id = $${idx++}`);
+        values.push(value);
+      } else if (key === "recoveryDate") {
+        fields.push(`recovery_date = $${idx++}`);
+        values.push(value);
+      } else if (key === "estimatedValue") {
+        fields.push(`estimated_value = $${idx++}`);
+        values.push(value);
+      } else if (key === "repairCost") {
+        fields.push(`repair_cost = $${idx++}`);
+        values.push(value);
+      } else {
+        fields.push(`${key} = $${idx++}`);
+        values.push(value);
+      }
+    }
+    if (fields.length === 0) return this.getRecoveryItem(id);
+    values.push(id);
+    const sql = `UPDATE recovery_items SET ${fields.join(", ")} WHERE id = $${values.length} RETURNING *`;
+    const res = await pool.query(sql, values);
+    if (res.rows.length === 0) return undefined;
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      adsId: row.ads_id,
+      clientId: row.client_id,
+      brand: row.brand,
+      model: row.model,
+      condition: row.condition,
+      recoveryDate: row.recovery_date,
+      estimatedValue: row.estimated_value,
+      repairCost: row.repair_cost,
+      status: row.status,
+      notes: row.notes
+    };
   }
 
   async deleteRecoveryItem(id: number): Promise<boolean> {
-    return this.recoveryItems.delete(id);
+    const res = await pool.query("DELETE FROM recovery_items WHERE id = $1", [id]);
+    return (res.rowCount ?? 0) > 0;
   }
 
   // Product Date Events
@@ -683,7 +1076,7 @@ export class PostgresStorage implements IStorage {
     const res = await pool.query("SELECT * FROM product_date_events ORDER BY created_at DESC");
     return res.rows.map(row => ({
       id: row.id,
-      productId: row.product_id,
+      adsId: row.ads_id,
       clientId: row.client_id,
       eventType: row.event_type,
       eventDate: row.event_date,
@@ -692,11 +1085,11 @@ export class PostgresStorage implements IStorage {
     }));
   }
 
-  async getProductDateEventsByProduct(productId: number): Promise<ProductDateEvent[]> {
-    const res = await pool.query("SELECT * FROM product_date_events WHERE product_id = $1 ORDER BY created_at DESC", [productId]);
+  async getProductDateEventsByProduct(adsId: string): Promise<ProductDateEvent[]> {
+    const res = await pool.query("SELECT * FROM product_date_events WHERE ads_id = $1 ORDER BY created_at DESC", [adsId]);
     return res.rows.map(row => ({
       id: row.id,
-      productId: row.product_id,
+      adsId: row.ads_id,
       clientId: row.client_id,
       eventType: row.event_type,
       eventDate: row.event_date,
@@ -711,7 +1104,7 @@ export class PostgresStorage implements IStorage {
     const row = res.rows[0];
     return {
       id: row.id,
-      productId: row.product_id,
+      adsId: row.ads_id,
       clientId: row.client_id,
       eventType: row.event_type,
       eventDate: row.event_date,
@@ -723,11 +1116,11 @@ export class PostgresStorage implements IStorage {
   async createProductDateEvent(insertEvent: InsertProductDateEvent): Promise<ProductDateEvent> {
     const res = await pool.query(
       `INSERT INTO product_date_events
-        (product_id, client_id, event_type, event_date, notes, created_at)
+        (ads_id, client_id, event_type, event_date, notes, created_at)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
       [
-        insertEvent.productId,
+        insertEvent.adsId,
         insertEvent.clientId ?? null,
         insertEvent.eventType,
         insertEvent.eventDate,
@@ -739,7 +1132,7 @@ export class PostgresStorage implements IStorage {
     const row = res.rows[0];
     return {
       id: row.id,
-      productId: row.product_id,
+      adsId: row.ads_id,
       clientId: row.client_id,
       eventType: row.event_type,
       eventDate: row.event_date,
@@ -754,8 +1147,8 @@ export class PostgresStorage implements IStorage {
     const values = [];
     let idx = 1;
     for (const [key, value] of Object.entries(eventUpdate)) {
-      if (key === "productId") {
-        fields.push(`product_id = $${idx++}`);
+      if (key === "adsId") {
+        fields.push(`ads_id = $${idx++}`);
         values.push(value);
       } else if (key === "clientId") {
         fields.push(`client_id = $${idx++}`);
@@ -779,7 +1172,7 @@ export class PostgresStorage implements IStorage {
     const row = res.rows[0];
     return {
       id: row.id,
-      productId: row.product_id,
+      adsId: row.ads_id,
       clientId: row.client_id,
       eventType: row.event_type,
       eventDate: row.event_date,
@@ -795,39 +1188,78 @@ export class PostgresStorage implements IStorage {
 
   // Analytics
   async getDashboardStats() {
-    const products = Array.from(this.products.values()).filter(p => p.isActive);
-    const sales = Array.from(this.sales.values());
-    const clients = Array.from(this.clients.values()).filter(c => c.isActive);
-    const recovery = Array.from(this.recoveryItems.values());
+    try {
+      // Get total inventory
+      const inventoryRes = await pool.query(
+        "SELECT SUM(stock_quantity) as total FROM products WHERE is_active = TRUE"
+      );
+      const totalInventory = parseInt(inventoryRes.rows[0]?.total || '0');
 
-    const currentDate = new Date();
-    const currentMonth = currentDate.getMonth();
-    const currentYear = currentDate.getFullYear();
-    
-    const monthlySales = sales
-      .filter(s => {
-        const saleDate = new Date(s.saleDate);
-        return saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear;
-      })
-      .reduce((sum, sale) => sum + parseFloat(sale.totalAmount), 0);
+      // Get monthly sales
+      const currentDate = new Date();
+      const currentMonth = currentDate.getMonth() + 1; // PostgreSQL months are 1-based
+      const currentYear = currentDate.getFullYear();
 
-    const lowStockItems = products.filter(p => p.stockQuantity < 10).length;
-    const pendingOrders = sales.filter(s => s.status === "pending").length;
-    
-    // Simple growth calculation (mock data for now)
-    const salesGrowth = 8.5;
-    const clientGrowth = -2;
+      const monthlySalesRes = await pool.query(
+        `SELECT SUM(total_amount) as total FROM sales
+         WHERE EXTRACT(MONTH FROM sale_date::date) = $1
+         AND EXTRACT(YEAR FROM sale_date::date) = $2`,
+        [currentMonth, currentYear]
+      );
+      const monthlySales = parseFloat(monthlySalesRes.rows[0]?.total || '0');
 
-    return {
-      totalInventory: products.reduce((sum, p) => sum + p.stockQuantity, 0),
-      monthlySales,
-      activeClients: clients.length,
-      recoveryItems: recovery.length,
-      lowStockItems,
-      pendingOrders,
-      salesGrowth,
-      clientGrowth,
-    };
+      // Get active clients count
+      const clientsRes = await pool.query(
+        "SELECT COUNT(*) as count FROM clients WHERE is_active = TRUE"
+      );
+      const activeClients = parseInt(clientsRes.rows[0]?.count || '0');
+
+      // Get recovery items count
+      const recoveryRes = await pool.query(
+        "SELECT COUNT(*) as count FROM recovery_items"
+      );
+      const recoveryItems = parseInt(recoveryRes.rows[0]?.count || '0');
+
+      // Get low stock items
+      const lowStockRes = await pool.query(
+        "SELECT COUNT(*) as count FROM products WHERE is_active = TRUE AND stock_quantity < 10"
+      );
+      const lowStockItems = parseInt(lowStockRes.rows[0]?.count || '0');
+
+      // Get pending orders
+      const pendingRes = await pool.query(
+        "SELECT COUNT(*) as count FROM sales WHERE status = 'pending'"
+      );
+      const pendingOrders = parseInt(pendingRes.rows[0]?.count || '0');
+
+      // Calculate growth (simplified - you can enhance this)
+      const salesGrowth = 8.5; // Placeholder - implement actual calculation
+      const clientGrowth = -2;  // Placeholder - implement actual calculation
+
+      return {
+        totalInventory,
+        monthlySales,
+        activeClients,
+        recoveryItems,
+        lowStockItems,
+        pendingOrders,
+        salesGrowth,
+        clientGrowth,
+      };
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      // Return default values if query fails
+      return {
+        totalInventory: 0,
+        monthlySales: 0,
+        activeClients: 0,
+        recoveryItems: 0,
+        lowStockItems: 0,
+        pendingOrders: 0,
+        salesGrowth: 0,
+        clientGrowth: 0,
+      };
+    }
   }
 }
 

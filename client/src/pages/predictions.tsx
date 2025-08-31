@@ -59,9 +59,9 @@ export default function Predictions() {
     const lowStockItems = products.filter(p => p.stockQuantity < 10);
     const outOfStockSoon = products.filter(p => {
       const dailySales = recentSales
-        .filter(sale => sale.productId === p.id)
+        .filter(sale => sale.adsId === p.adsId)
         .reduce((sum, sale) => sum + sale.quantity, 0) / days;
-      
+
       return dailySales > 0 && (p.stockQuantity / dailySales) < 14; // Will run out in 2 weeks
     });
 

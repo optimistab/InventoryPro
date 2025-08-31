@@ -33,7 +33,7 @@ export default function SaleForm({ onSuccess, onCancel }: SaleFormProps) {
     resolver: zodResolver(insertSaleSchema),
     defaultValues: {
       clientId: 0,
-      productId: 0,
+      adsId: "",
       quantity: 1,
       unitPrice: "0",
       totalAmount: "0",
@@ -43,20 +43,20 @@ export default function SaleForm({ onSuccess, onCancel }: SaleFormProps) {
     },
   });
 
-  const selectedProductId = form.watch("productId");
+  const selectedAdsId = form.watch("adsId");
   const quantity = form.watch("quantity");
 
   // Update unit price and total when product changes
   useEffect(() => {
-    if (selectedProductId && products) {
-      const product = products.find(p => p.id === selectedProductId);
+    if (selectedAdsId && products) {
+      const product = products.find(p => p.adsId === selectedAdsId);
       if (product) {
         const unitPrice = parseFloat(product.price);
         form.setValue("unitPrice", product.price);
         form.setValue("totalAmount", (unitPrice * quantity).toFixed(2));
       }
     }
-  }, [selectedProductId, quantity, products, form]);
+  }, [selectedAdsId, quantity, products, form]);
 
   const createSaleMutation = useMutation({
     mutationFn: async (data: InsertSale) => {
@@ -117,11 +117,11 @@ export default function SaleForm({ onSuccess, onCancel }: SaleFormProps) {
 
           <FormField
             control={form.control}
-            name="productId"
+            name="adsId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Product</FormLabel>
-                <Select onValueChange={(value) => field.onChange(parseInt(value))}>
+                <Select onValueChange={field.onChange}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select product" />
@@ -129,7 +129,7 @@ export default function SaleForm({ onSuccess, onCancel }: SaleFormProps) {
                   </FormControl>
                   <SelectContent>
                     {products?.filter(p => p.stockQuantity > 0).map((product) => (
-                      <SelectItem key={product.id} value={product.id.toString()}>
+                      <SelectItem key={product.adsId} value={product.adsId}>
                         {product.name} - ${product.price} (Stock: {product.stockQuantity})
                       </SelectItem>
                     ))}
@@ -251,10 +251,11 @@ export default function SaleForm({ onSuccess, onCancel }: SaleFormProps) {
             <FormItem>
               <FormLabel>Notes (Optional)</FormLabel>
               <FormControl>
-                <Textarea 
+                <Textarea
                   placeholder="Additional notes about the sale..."
                   className="min-h-[60px]"
                   {...field}
+                  value={field.value || ''}
                 />
               </FormControl>
               <FormMessage />

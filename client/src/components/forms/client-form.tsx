@@ -23,12 +23,12 @@ export default function ClientForm({ onSuccess, onCancel }: ClientFormProps) {
     defaultValues: {
       name: "",
       email: "",
-      phone: "",
-      address: "",
-      city: "",
-      state: "",
-      zipCode: "",
-      company: "",
+      phone: null,
+      address: null,
+      city: null,
+      state: null,
+      zipCode: null,
+      company: null,
       isActive: true,
     },
   });
@@ -101,7 +101,7 @@ export default function ClientForm({ onSuccess, onCancel }: ClientFormProps) {
               <FormItem>
                 <FormLabel>Phone</FormLabel>
                 <FormControl>
-                  <Input placeholder="+1 (555) 123-4567" {...field} />
+                  <Input placeholder="+1 (555) 123-4567" {...field} value={field.value || ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -115,7 +115,7 @@ export default function ClientForm({ onSuccess, onCancel }: ClientFormProps) {
               <FormItem>
                 <FormLabel>Company (Optional)</FormLabel>
                 <FormControl>
-                  <Input placeholder="Company Name" {...field} />
+                  <Input placeholder="Company Name" {...field} value={field.value || ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -130,7 +130,7 @@ export default function ClientForm({ onSuccess, onCancel }: ClientFormProps) {
             <FormItem>
               <FormLabel>Address</FormLabel>
               <FormControl>
-                <Input placeholder="123 Main Street" {...field} />
+                <Input placeholder="123 Main Street" {...field} value={field.value || ''} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -145,7 +145,7 @@ export default function ClientForm({ onSuccess, onCancel }: ClientFormProps) {
               <FormItem>
                 <FormLabel>City</FormLabel>
                 <FormControl>
-                  <Input placeholder="New York" {...field} />
+                  <Input placeholder="New York" {...field} value={field.value || ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -159,7 +159,7 @@ export default function ClientForm({ onSuccess, onCancel }: ClientFormProps) {
               <FormItem>
                 <FormLabel>State</FormLabel>
                 <FormControl>
-                  <Input placeholder="NY" {...field} />
+                  <Input placeholder="NY" {...field} value={field.value || ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -173,7 +173,7 @@ export default function ClientForm({ onSuccess, onCancel }: ClientFormProps) {
               <FormItem>
                 <FormLabel>ZIP Code</FormLabel>
                 <FormControl>
-                  <Input placeholder="10001" {...field} />
+                  <Input placeholder="10001" {...field} value={field.value || ''} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
