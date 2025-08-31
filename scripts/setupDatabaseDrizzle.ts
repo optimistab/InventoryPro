@@ -29,7 +29,7 @@ async function setupDatabaseDrizzle() {
       console.log('✅ Drizzle migrations completed successfully!');
     } catch (migrationError) {
       // If migration fails due to existing tables, that's okay
-      if (migrationError.message?.includes('already exists')) {
+      if (migrationError instanceof Error && migrationError.message?.includes('already exists')) {
         console.log('⚠️  Some tables already exist, but this is normal');
         console.log('💡 Migration system will handle this gracefully');
         console.log('✅ Database is ready to use');
@@ -48,13 +48,15 @@ async function setupDatabaseDrizzle() {
     console.error('❌ Database setup failed:', error);
     
     // Provide helpful error messages
-    if (error.message?.includes('SSL/TLS required')) {
-      console.error('💡 SSL/TLS Error: Make sure your DATABASE_URL includes sslmode=require for production');
-    } else if (error.message?.includes('relation') && error.message?.includes('already exists')) {
-      console.log('⚠️  Some tables already exist, but this is normal');
-      console.log('💡 The migration system will handle this gracefully');
-    } else if (error.message?.includes('does not exist')) {
-      console.error('💡 Database does not exist. Please create the database first.');
+    if (error instanceof Error) {
+      if (error.message?.includes('SSL/TLS required')) {
+        console.error('💡 SSL/TLS Error: Make sure your DATABASE_URL includes sslmode=require for production');
+      } else if (error.message?.includes('relation') && error.message?.includes('already exists')) {
+        console.log('⚠️  Some tables already exist, but this is normal');
+        console.log('💡 The migration system will handle this gracefully');
+      } else if (error.message?.includes('does not exist')) {
+        console.error('💡 Database does not exist. Please create the database first.');
+      }
     }
     
     throw error;
@@ -63,17 +65,4 @@ async function setupDatabaseDrizzle() {
   }
 }
 
-// Run if this file is executed directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  setupDatabaseDrizzle()
-    .then(() => {
-      console.log('🎉 Database setup completed!');
-      process.exit(0);
-    })
-    .catch((error) => {
-      console.error('💥 Database setup failed:', error);
-      process.exit(1);
-    });
-}
-
-export default setupDatabaseDrizzle; 
+export default setupDatabaseDrizzle;

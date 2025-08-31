@@ -102,7 +102,6 @@ app.use((req, res, next) => {
     const message = err.message || "Internal Server Error";
 
     res.status(status).json({ message });
-    throw err;
   });
 
   // npm run db:push - this command make sure that tables are created
