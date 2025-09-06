@@ -754,226 +754,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Setup endpoint for production database initialization
+  // Setup endpoint for production - simplified due to database reset strategy
   app.post("/api/setup", async (req, res) => {
     try {
-      console.log("🚀 Production setup initiated via API...");
+      console.log("🚀 Production setup check...");
 
       // Check if we're in production
       if (process.env.NODE_ENV !== 'production') {
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: "Setup endpoint only available in production",
           message: "This endpoint is designed for production use only"
         });
       }
 
-      // Check database connection
+      // Test database connection
       console.log("📡 Testing database connection...");
       await pool.query('SELECT NOW()');
       console.log("✅ Database connection successful");
 
-      // Check if users table exists - use a safer approach
-      console.log("🔍 Checking database schema...");
-      let tableExists = false;
-      try {
-        const tableCheck = await pool.query(`
-          SELECT EXISTS (
-            SELECT FROM information_schema.tables 
-            WHERE table_schema = 'public' 
-            AND table_name = 'users'
-          );
-        `);
-        tableExists = tableCheck.rows[0].exists;
-      } catch (error) {
-        console.log("⚠️  Could not check if users table exists, assuming it doesn't");
-        tableExists = false;
+      // Check if users exist (database should already be set up by build process)
+      const userCheck = await pool.query('SELECT COUNT(*) FROM users');
+      const userCount = parseInt(userCheck.rows[0].count);
+
+      if (userCount === 0) {
+        return res.status(500).json({
+          error: "No users found",
+          message: "Database setup may have failed during build. Please check build logs."
+        });
       }
 
-      if (!tableExists) {
-        console.log("❌ Users table does not exist");
-        console.log("🔄 Creating database schema...");
-        
-        try {
-          // Create drizzle instance and run migrations
-          const db = drizzle(pool);
-          await migrate(db, { migrationsFolder: "./migrations" });
-          console.log("✅ Database schema created successfully");
-        } catch (migrationError) {
-          console.log("⚠️  Migration failed, trying schema push...");
-          // Fallback: try to push schema directly
-          const { execSync } = await import('child_process');
-          try {
-            execSync('npm run db:push', { stdio: 'inherit' });
-            console.log("✅ Database schema pushed successfully");
-          } catch (pushError) {
-            console.error("❌ Failed to create database schema");
-            return res.status(500).json({ 
-              error: "Failed to create database schema",
-              message: "Please ensure your DATABASE_URL is correct and the database is accessible"
-            });
-          }
-        }
-      } else {
-        console.log("✅ Database schema exists");
-      }
+      console.log(`📋 Found ${userCount} users in database`);
 
-      // Always try to ensure schema is up to date
-      console.log("🔄 Ensuring schema is up to date...");
-      try {
-        const { execSync } = await import('child_process');
-        execSync('npm run db:push', { stdio: 'inherit' });
-        console.log("✅ Schema is up to date");
-      } catch (error) {
-        console.log("⚠️  Schema push failed, continuing with existing schema");
-      }
-
-      // Check if users table has the is_active column
-      let hasIsActiveColumn = false;
-      try {
-        const columnCheck = await pool.query(`
-          SELECT column_name 
-          FROM information_schema.columns 
-          WHERE table_name = 'users' AND column_name = 'is_active'
-        `);
-        hasIsActiveColumn = columnCheck.rows.length > 0;
-      } catch (error) {
-        console.log("⚠️  Could not check column structure, assuming schema needs update");
-        hasIsActiveColumn = false;
-      }
-
-      if (!hasIsActiveColumn) {
-        console.log("❌ Users table missing 'is_active' column or table doesn't exist");
-        console.log("🔄 Updating schema...");
-        try {
-          const { execSync } = await import('child_process');
-          execSync('npm run db:push', { stdio: 'inherit' });
-          console.log("✅ Schema updated successfully");
-        } catch (error) {
-          console.error("❌ Failed to update schema");
-          return res.status(500).json({ error: "Failed to update schema" });
-        }
-      }
-
-      console.log("✅ Database schema is up to date");
-
-      // Check if users already exist
-      let userCount = 0;
-      try {
-        const existingUsers = await pool.query('SELECT COUNT(*) FROM users');
-        userCount = parseInt(existingUsers.rows[0].count);
-      } catch (error) {
-        console.log("⚠️  Could not check existing users, assuming none exist");
-        userCount = 0;
-      }
-
-      if (userCount > 0) {
-        console.log(`📋 Found ${userCount} existing users`);
-        
-        // Define the new user structure
-        const userTypes = [
-          { role: "admin", count: 3, prefix: "admin_" },
-          { role: "developer", count: 2, prefix: "dev_" },
-          { role: "support", count: 2, prefix: "support_" },
-          { role: "salesperson", count: 6, prefix: "sales_" },
-          { role: "salesmanager", count: 2, prefix: "sales_mgr_" },
-          { role: "InventoryStaff", count: 2, prefix: "inv_staff_" }
-        ];
-
-        // Generate expected usernames
-        const expectedUsernames: string[] = [];
-        for (const userType of userTypes) {
-          for (let i = 1; i <= userType.count; i++) {
-            expectedUsernames.push(`${userType.prefix}${String(i).padStart(2, '0')}`);
-          }
-        }
-
-        // Check if all required users exist
-        const existingUsers = await pool.query(`
-          SELECT username, is_active FROM users
-          WHERE username = ANY($1)
-        `, [expectedUsernames]);
-
-        const foundUsers = existingUsers.rows.map((row: any) => row.username);
-        const missingUsers = expectedUsernames.filter(username => !foundUsers.includes(username));
-
-        if (missingUsers.length > 0) {
-          console.log(`⚠️  Missing required users: ${missingUsers.length} out of ${expectedUsernames.length}`);
-          console.log("   Creating missing users...");
-
-          // Create missing users
-          for (const username of missingUsers) {
-            // Determine role from username prefix
-            const userType = userTypes.find(type => username.startsWith(type.prefix));
-            if (!userType) continue;
-
-            const password = `${username}123`;
-            const role = userType.role;
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            await pool.query(
-              `INSERT INTO users (username, password, role, date_of_creation, is_active)
-               VALUES ($1, $2, $3, $4, $5)`,
-              [username, hashedPassword, role, new Date().toISOString(), true]
-            );
-
-            console.log(`✅ Created user: ${username} (${role})`);
-          }
-        }
-
-        // Deactivate all users not in the expected list
-        console.log("🔒 Restricting access to only allowed users...");
-        await pool.query(`
-          UPDATE users
-          SET is_active = false
-          WHERE username != ALL($1)
-        `, [expectedUsernames]);
-
-        // Ensure all expected users are active
-        await pool.query(`
-          UPDATE users
-          SET is_active = true
-          WHERE username = ANY($1)
-        `, [expectedUsernames]);
-
-      } else {
-        console.log("📝 No users found, creating the new user structure...");
-
-        // Define the new user structure
-        const userTypes = [
-          { role: "admin", count: 3, prefix: "admin_" },
-          { role: "developer", count: 2, prefix: "dev_" },
-          { role: "support", count: 2, prefix: "support_" },
-          { role: "salesperson", count: 6, prefix: "sales_" },
-          { role: "salesmanager", count: 2, prefix: "sales_mgr_" },
-          { role: "InventoryStaff", count: 2, prefix: "inv_staff_" }
-        ];
-
-        // Create all users
-        for (const userType of userTypes) {
-          for (let i = 1; i <= userType.count; i++) {
-            const username = `${userType.prefix}${String(i).padStart(2, '0')}`;
-            const password = `${username}123`;
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            await pool.query(
-              `INSERT INTO users (username, password, role, date_of_creation, is_active)
-               VALUES ($1, $2, $3, $4, $5)`,
-              [username, hashedPassword, userType.role, new Date().toISOString(), true]
-            );
-
-            console.log(`✅ Created user: ${username} (${userType.role})`);
-          }
-        }
-      }
-
-      // Verify final state
+      // Get user credentials
       const activeUsers = await pool.query(`
-        SELECT username, role FROM users 
-        WHERE is_active = true 
+        SELECT username, role, employee_id FROM users
+        WHERE is_active = true
         ORDER BY username
       `);
-
-      console.log("\n🎉 Production setup completed successfully!");
 
       // Generate credentials for all active users
       const credentials: Record<string, string> = {};
@@ -981,9 +798,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         credentials[user.username] = `${user.username}123`;
       }
 
+      console.log("🎉 Production setup verified successfully!");
+
       res.json({
         success: true,
-        message: "Production setup completed successfully!",
+        message: "Production setup verified successfully!",
         users: activeUsers.rows,
         credentials: credentials,
         userTypes: {
@@ -997,9 +816,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
     } catch (error) {
-      console.error("❌ Production setup failed:", error);
-      res.status(500).json({ 
-        error: "Production setup failed", 
+      console.error("❌ Production setup check failed:", error);
+      res.status(500).json({
+        error: "Production setup check failed",
         message: error instanceof Error ? error.message : "Unknown error"
       });
     }

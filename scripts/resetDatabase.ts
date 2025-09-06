@@ -100,21 +100,27 @@ async function resetDatabase() {
       }
     }
 
-    // Hash passwords and insert users
+    // Hash passwords and insert users with employee IDs
+    let employeeIdCounter = 1;
     for (const user of allUsers) {
       // Hash the password
       const hashedPassword = await bcrypt.hash(user.password, 10);
+
+      // Generate employee ID
+      const employeeId = `ADS${String(employeeIdCounter).padStart(4, '0')}`;
 
       // Insert user into database
       await db.insert(users).values({
         username: user.username,
         password: hashedPassword,
         role: user.role,
+        employeeId: employeeId,
         dateOfCreation: new Date().toISOString(),
         isActive: true,
       });
 
-      console.log(`✅ Created user: ${user.username} (${user.role})`);
+      console.log(`✅ Created user: ${user.username} (${user.role}) - Employee ID: ${employeeId}`);
+      employeeIdCounter++;
     }
 
     console.log('✅ Users created successfully!');
