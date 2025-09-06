@@ -1,6 +1,0 @@
-name,sku,brand,model,category,condition,price,cost,stockQuantity,specifications,description
-"Dell XPS 13 Laptop","DXPS13-001","Dell","XPS 13","laptop","new","1299.99","999.99","5","8GB RAM, 256GB SSD, Intel i5","Compact ultrabook for business"
-"MacBook Pro 16-inch","MBP16-001","Apple","MacBook Pro","laptop","new","2499.99","1999.99","3","16GB RAM, 512GB SSD, M2 Pro chip","Professional laptop for creative work"
-"HP Pavilion Desktop","HP-PAV-001","HP","Pavilion","desktop","refurbished","899.99","699.99","2","16GB RAM, 1TB HDD, Intel i3","Reliable desktop for office work"
-"Lenovo ThinkPad X1","TPX1-001","Lenovo","ThinkPad X1","laptop","new","1899.99","1499.99","4","16GB RAM, 512GB SSD, Intel i7","Business ultrabook with premium build"
-"Asus ROG Gaming","ASUS-ROG-001","Asus","ROG Strix","laptop","new","1799.99","1399.99","6","16GB RAM, 1TB SSD, RTX 4070","Gaming laptop for high-performance tasks"
