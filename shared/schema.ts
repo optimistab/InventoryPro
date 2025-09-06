@@ -26,6 +26,16 @@ export const products = pgTable("products", {
   specifications: text("specifications"), // JSON string of specs
   description: text("description"),
   isActive: boolean("is_active").notNull().default(true),
+  prodId: text("prod_id"), // Serial number of the product
+  prodHealth: text("prod_health"), // "working", "maintenance", "expired"
+  prodStatus: text("prod_status"), // "leased", "sold", "leased but not working", etc.
+  lastAuditDate: text("last_audit_date"), // ISO date string
+  auditStatus: text("audit_status"), // "Y", "N"
+  returnDate: text("return_date"), // ISO date string
+  maintenanceDate: text("maintenance_date"), // ISO date string, NULL for last maintenance date
+  maintenanceStatus: text("maintenance_status"), // "Y", "N"
+  orderStatus: text("order_status"), // "REN" = rent, "PUR" = purchase
+  createdBy: text("created_by"), // emp_id
 });
 
 // Clients table
@@ -40,6 +50,13 @@ export const clients = pgTable("clients", {
   zipCode: text("zip_code"),
   company: text("company"),
   isActive: boolean("is_active").notNull().default(true),
+  // New customer information fields
+  cxType: text("cx_type"), // "Retail", "ORG"
+  gst: text("gst"), // 15-digit GST number
+  idProof: text("id_proof"), // "Aadhar", "PAN"
+  website: text("website"),
+  addressProof: text("address_proof"), // "Y", "N"
+  repeatCx: text("repeat_cx"), // "Y", "N"
 });
 
 // Sales table
@@ -113,6 +130,57 @@ export const recoveryItems = pgTable("recovery_items", {
     notes: text("notes"),
 });
 
+// Orders table
+export const orders = pgTable("orders", {
+  id: serial("id").primaryKey(),
+  adsId: text("ads_id").notNull(), // Reference to products.adsId
+  customerId: integer("customer_id").notNull(), // Reference to clients.id
+  orderId: text("order_id").notNull().unique(), // Auto-generated based on customer ID and date
+  orderStatus: text("order_status").notNull(), // "REN", "PUR"
+  requiredPieces: integer("required_pieces").notNull(),
+  deliveredPieces: integer("delivered_pieces").notNull().default(0),
+  paymentPerPiece: decimal("payment_per_piece", { precision: 10, scale: 2 }).notNull(),
+  securityDeposit: decimal("security_deposit", { precision: 10, scale: 2 }),
+  totalPayment: decimal("total_payment", { precision: 10, scale: 2 }).notNull(),
+  contractDate: text("contract_date").notNull(), // ISO date string
+  deliveryDate: text("delivery_date"), // ISO date string
+  quotedPrice: decimal("quoted_price", { precision: 10, scale: 2 }),
+  discount: text("discount"),
+  prodId: text("prod_id"), // Serial number
+  prodName: text("prod_name"),
+  prodCategory: text("prod_category"),
+  createdAt: text("created_at").notNull(), // ISO date string
+});
+
+// Sales Buy table - for purchase transactions
+export const salesBuy = pgTable("sales_buy", {
+  id: serial("id").primaryKey(),
+  adsId: text("ads_id").notNull(), // Reference to products.adsId
+  salesDate: text("sales_date").notNull(), // ISO date string - when payment is received
+  costPrice: decimal("cost_price", { precision: 10, scale: 2 }).notNull(),
+  sellingPrice: decimal("selling_price", { precision: 10, scale: 2 }).notNull(),
+  customerId: integer("customer_id").notNull(), // Reference to clients.id
+  orderId: text("order_id"), // Reference to orders.orderId
+  miscCost: decimal("misc_cost", { precision: 10, scale: 2 }), // Cisco, Anti virus etc
+  empId: text("emp_id"), // Employee who did the sales
+});
+
+// Sales Rent table - for rental/lease transactions
+export const salesRent = pgTable("sales_rent", {
+  id: serial("id").primaryKey(),
+  adsId: text("ads_id").notNull(), // Reference to products.adsId
+  prodId: text("prod_id"), // Serial number
+  customerId: integer("customer_id").notNull(), // Reference to clients.id
+  paymentDate: text("payment_date").notNull(), // ISO date string - when product is leased/rented
+  paymentDueDate: text("payment_due_date").notNull(), // Start and End date for EMIs
+  paymentStatus: text("payment_status").notNull(), // "Pending", "Incoming", "Complete"
+  leasedQuantity: integer("leased_quantity").notNull(),
+  leaseAmount: decimal("lease_amount", { precision: 10, scale: 2 }).notNull(),
+  paymentFrequency: integer("payment_frequency").notNull(), // 1 = per month, 2 = per 2 months
+  paymentTotalNumber: integer("payment_total_number").notNull(),
+  empId: text("emp_id"), // Employee ID
+});
+
 // Users table
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
@@ -155,6 +223,18 @@ export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
 });
 
+export const insertOrderSchema = createInsertSchema(orders).omit({
+  id: true,
+});
+
+export const insertSalesBuySchema = createInsertSchema(salesBuy).omit({
+  id: true,
+});
+
+export const insertSalesRentSchema = createInsertSchema(salesRent).omit({
+  id: true,
+});
+
 // Types
 export type Product = typeof products.$inferSelect;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
@@ -176,6 +256,15 @@ export type InsertProductDateEvent = z.infer<typeof insertProductDateEventSchema
 
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
+
+export type Order = typeof orders.$inferSelect;
+export type InsertOrder = z.infer<typeof insertOrderSchema>;
+
+export type SalesBuy = typeof salesBuy.$inferSelect;
+export type InsertSalesBuy = z.infer<typeof insertSalesBuySchema>;
+
+export type SalesRent = typeof salesRent.$inferSelect;
+export type InsertSalesRent = z.infer<typeof insertSalesRentSchema>;
 
 
 // Extended types for joins

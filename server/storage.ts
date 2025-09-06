@@ -1,10 +1,13 @@
-import { 
-  Product, InsertProduct, 
-  Client, InsertClient, 
+import {
+  Product, InsertProduct,
+  Client, InsertClient,
   Sale, InsertSale, SaleWithDetails,
   ClientRequirement, InsertClientRequirement,
   RecoveryItem, InsertRecoveryItem,
-  ProductDateEvent, InsertProductDateEvent
+  ProductDateEvent, InsertProductDateEvent,
+  Order, InsertOrder,
+  SalesBuy, InsertSalesBuy,
+  SalesRent, InsertSalesRent
 } from "@shared/schema";
 import pool from "./../db";
 
@@ -62,6 +65,21 @@ export interface IStorage {
   updateProductDateEvent(id: number, event: Partial<InsertProductDateEvent>): Promise<ProductDateEvent | undefined>;
   deleteProductDateEvent(id: number): Promise<boolean>;
 
+  // Orders
+  getOrders(): Promise<Order[]>;
+  getOrder(id: number): Promise<Order | undefined>;
+  createOrder(order: InsertOrder): Promise<Order>;
+  updateOrder(id: number, order: Partial<InsertOrder>): Promise<Order | undefined>;
+  deleteOrder(id: number): Promise<boolean>;
+
+  // Sales Buy
+  getSalesBuy(): Promise<SalesBuy[]>;
+  createSalesBuy(salesBuy: InsertSalesBuy): Promise<SalesBuy>;
+
+  // Sales Rent
+  getSalesRent(): Promise<SalesRent[]>;
+  createSalesRent(salesRent: InsertSalesRent): Promise<SalesRent>;
+
   // Analytics
   getDashboardStats(): Promise<{
     totalInventory: number;
@@ -83,9 +101,9 @@ export class PostgresStorage implements IStorage {
     const res = await pool.query("SELECT * FROM products WHERE is_active = TRUE");
 
     return res.rows.map(row => ({
-      id: row.id, //
-      adsId: row.ads_id, //
-      referenceNumber: row.reference_number, //
+      id: row.id,
+      adsId: row.ads_id,
+      referenceNumber: row.reference_number,
       brand: row.brand,
       name: row.name,
       sku: row.sku,
@@ -97,7 +115,18 @@ export class PostgresStorage implements IStorage {
       stockQuantity: row.stock_quantity,
       specifications: row.specifications,
       description: row.description,
-      isActive: row.is_active //
+      isActive: row.is_active,
+      // New fields
+      prodId: row.prod_id,
+      prodHealth: row.prod_health,
+      prodStatus: row.prod_status,
+      lastAuditDate: row.last_audit_date,
+      auditStatus: row.audit_status,
+      returnDate: row.return_date,
+      maintenanceDate: row.maintenance_date,
+      maintenanceStatus: row.maintenance_status,
+      orderStatus: row.order_status,
+      createdBy: row.created_by
     }));
   }
 
@@ -120,7 +149,18 @@ export class PostgresStorage implements IStorage {
       stockQuantity: row.stock_quantity,
       specifications: row.specifications,
       description: row.description,
-      isActive: row.is_active
+      isActive: row.is_active,
+      // New fields
+      prodId: row.prod_id,
+      prodHealth: row.prod_health,
+      prodStatus: row.prod_status,
+      lastAuditDate: row.last_audit_date,
+      auditStatus: row.audit_status,
+      returnDate: row.return_date,
+      maintenanceDate: row.maintenance_date,
+      maintenanceStatus: row.maintenance_status,
+      orderStatus: row.order_status,
+      createdBy: row.created_by
     };
   }
 
@@ -1240,6 +1280,304 @@ export class PostgresStorage implements IStorage {
   async deleteProductDateEvent(id: number): Promise<boolean> {
     const res = await pool.query("DELETE FROM product_date_events WHERE id = $1", [id]);
     return (res.rowCount ?? 0) > 0;
+  }
+
+  // Orders
+  async getOrders(): Promise<Order[]> {
+    const res = await pool.query("SELECT * FROM orders ORDER BY created_at DESC");
+    return res.rows.map(row => ({
+      id: row.id,
+      adsId: row.ads_id,
+      customerId: row.customer_id,
+      orderId: row.order_id,
+      orderStatus: row.order_status,
+      requiredPieces: row.required_pieces,
+      deliveredPieces: row.delivered_pieces,
+      paymentPerPiece: row.payment_per_piece,
+      securityDeposit: row.security_deposit,
+      totalPayment: row.total_payment,
+      contractDate: row.contract_date,
+      deliveryDate: row.delivery_date,
+      quotedPrice: row.quoted_price,
+      discount: row.discount,
+      prodId: row.prod_id,
+      prodName: row.prod_name,
+      prodCategory: row.prod_category,
+      createdAt: row.created_at
+    }));
+  }
+
+  async getOrder(id: number): Promise<Order | undefined> {
+    const res = await pool.query("SELECT * FROM orders WHERE id = $1", [id]);
+    if (res.rows.length === 0) return undefined;
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      adsId: row.ads_id,
+      customerId: row.customer_id,
+      orderId: row.order_id,
+      orderStatus: row.order_status,
+      requiredPieces: row.required_pieces,
+      deliveredPieces: row.delivered_pieces,
+      paymentPerPiece: row.payment_per_piece,
+      securityDeposit: row.security_deposit,
+      totalPayment: row.total_payment,
+      contractDate: row.contract_date,
+      deliveryDate: row.delivery_date,
+      quotedPrice: row.quoted_price,
+      discount: row.discount,
+      prodId: row.prod_id,
+      prodName: row.prod_name,
+      prodCategory: row.prod_category,
+      createdAt: row.created_at
+    };
+  }
+
+  async createOrder(insertOrder: InsertOrder): Promise<Order> {
+    const res = await pool.query(
+      `INSERT INTO orders
+        (ads_id, customer_id, order_id, order_status, required_pieces, delivered_pieces, payment_per_piece, security_deposit, total_payment, contract_date, delivery_date, quoted_price, discount, prod_id, prod_name, prod_category, created_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
+       RETURNING *`,
+      [
+        insertOrder.adsId,
+        insertOrder.customerId,
+        insertOrder.orderId,
+        insertOrder.orderStatus,
+        insertOrder.requiredPieces,
+        insertOrder.deliveredPieces ?? 0,
+        insertOrder.paymentPerPiece,
+        insertOrder.securityDeposit ?? null,
+        insertOrder.totalPayment,
+        insertOrder.contractDate,
+        insertOrder.deliveryDate ?? null,
+        insertOrder.quotedPrice ?? null,
+        insertOrder.discount ?? null,
+        insertOrder.prodId ?? null,
+        insertOrder.prodName ?? null,
+        insertOrder.prodCategory ?? null,
+        insertOrder.createdAt ?? new Date().toISOString()
+      ]
+    );
+
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      adsId: row.ads_id,
+      customerId: row.customer_id,
+      orderId: row.order_id,
+      orderStatus: row.order_status,
+      requiredPieces: row.required_pieces,
+      deliveredPieces: row.delivered_pieces,
+      paymentPerPiece: row.payment_per_piece,
+      securityDeposit: row.security_deposit,
+      totalPayment: row.total_payment,
+      contractDate: row.contract_date,
+      deliveryDate: row.delivery_date,
+      quotedPrice: row.quoted_price,
+      discount: row.discount,
+      prodId: row.prod_id,
+      prodName: row.prod_name,
+      prodCategory: row.prod_category,
+      createdAt: row.created_at
+    };
+  }
+
+  async updateOrder(id: number, orderUpdate: Partial<InsertOrder>): Promise<Order | undefined> {
+    // Build dynamic SET clause
+    const fields = [];
+    const values = [];
+    let idx = 1;
+    for (const [key, value] of Object.entries(orderUpdate)) {
+      if (key === "adsId") {
+        fields.push(`ads_id = $${idx++}`);
+        values.push(value);
+      } else if (key === "customerId") {
+        fields.push(`customer_id = $${idx++}`);
+        values.push(value);
+      } else if (key === "orderId") {
+        fields.push(`order_id = $${idx++}`);
+        values.push(value);
+      } else if (key === "orderStatus") {
+        fields.push(`order_status = $${idx++}`);
+        values.push(value);
+      } else if (key === "requiredPieces") {
+        fields.push(`required_pieces = $${idx++}`);
+        values.push(value);
+      } else if (key === "deliveredPieces") {
+        fields.push(`delivered_pieces = $${idx++}`);
+        values.push(value);
+      } else if (key === "paymentPerPiece") {
+        fields.push(`payment_per_piece = $${idx++}`);
+        values.push(value);
+      } else if (key === "securityDeposit") {
+        fields.push(`security_deposit = $${idx++}`);
+        values.push(value);
+      } else if (key === "totalPayment") {
+        fields.push(`total_payment = $${idx++}`);
+        values.push(value);
+      } else if (key === "contractDate") {
+        fields.push(`contract_date = $${idx++}`);
+        values.push(value);
+      } else if (key === "deliveryDate") {
+        fields.push(`delivery_date = $${idx++}`);
+        values.push(value);
+      } else if (key === "quotedPrice") {
+        fields.push(`quoted_price = $${idx++}`);
+        values.push(value);
+      } else if (key === "prodId") {
+        fields.push(`prod_id = $${idx++}`);
+        values.push(value);
+      } else if (key === "prodName") {
+        fields.push(`prod_name = $${idx++}`);
+        values.push(value);
+      } else if (key === "prodCategory") {
+        fields.push(`prod_category = $${idx++}`);
+        values.push(value);
+      } else if (key === "createdAt") {
+        fields.push(`created_at = $${idx++}`);
+        values.push(value);
+      } else {
+        fields.push(`${key} = $${idx++}`);
+        values.push(value);
+      }
+    }
+    if (fields.length === 0) return this.getOrder(id);
+    values.push(id);
+    const sql = `UPDATE orders SET ${fields.join(", ")} WHERE id = $${values.length} RETURNING *`;
+    const res = await pool.query(sql, values);
+    if (res.rows.length === 0) return undefined;
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      adsId: row.ads_id,
+      customerId: row.customer_id,
+      orderId: row.order_id,
+      orderStatus: row.order_status,
+      requiredPieces: row.required_pieces,
+      deliveredPieces: row.delivered_pieces,
+      paymentPerPiece: row.payment_per_piece,
+      securityDeposit: row.security_deposit,
+      totalPayment: row.total_payment,
+      contractDate: row.contract_date,
+      deliveryDate: row.delivery_date,
+      quotedPrice: row.quoted_price,
+      discount: row.discount,
+      prodId: row.prod_id,
+      prodName: row.prod_name,
+      prodCategory: row.prod_category,
+      createdAt: row.created_at
+    };
+  }
+
+  async deleteOrder(id: number): Promise<boolean> {
+    const res = await pool.query("DELETE FROM orders WHERE id = $1", [id]);
+    return (res.rowCount ?? 0) > 0;
+  }
+
+  // Sales Buy
+  async getSalesBuy(): Promise<SalesBuy[]> {
+    const res = await pool.query("SELECT * FROM sales_buy ORDER BY sales_date DESC");
+    return res.rows.map(row => ({
+      id: row.id,
+      adsId: row.ads_id,
+      salesDate: row.sales_date,
+      costPrice: row.cost_price,
+      sellingPrice: row.selling_price,
+      customerId: row.customer_id,
+      orderId: row.order_id,
+      miscCost: row.misc_cost,
+      empId: row.emp_id
+    }));
+  }
+
+  async createSalesBuy(insertSalesBuy: InsertSalesBuy): Promise<SalesBuy> {
+    const res = await pool.query(
+      `INSERT INTO sales_buy
+        (ads_id, sales_date, cost_price, selling_price, customer_id, order_id, misc_cost, emp_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING *`,
+      [
+        insertSalesBuy.adsId,
+        insertSalesBuy.salesDate,
+        insertSalesBuy.costPrice,
+        insertSalesBuy.sellingPrice,
+        insertSalesBuy.customerId,
+        insertSalesBuy.orderId ?? null,
+        insertSalesBuy.miscCost ?? null,
+        insertSalesBuy.empId ?? null
+      ]
+    );
+
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      adsId: row.ads_id,
+      salesDate: row.sales_date,
+      costPrice: row.cost_price,
+      sellingPrice: row.selling_price,
+      customerId: row.customer_id,
+      orderId: row.order_id,
+      miscCost: row.misc_cost,
+      empId: row.emp_id
+    };
+  }
+
+  // Sales Rent
+  async getSalesRent(): Promise<SalesRent[]> {
+    const res = await pool.query("SELECT * FROM sales_rent ORDER BY payment_date DESC");
+    return res.rows.map(row => ({
+      id: row.id,
+      adsId: row.ads_id,
+      prodId: row.prod_id,
+      customerId: row.customer_id,
+      paymentDate: row.payment_date,
+      paymentDueDate: row.payment_due_date,
+      paymentStatus: row.payment_status,
+      leasedQuantity: row.leased_quantity,
+      leaseAmount: row.lease_amount,
+      paymentFrequency: row.payment_frequency,
+      paymentTotalNumber: row.payment_total_number,
+      empId: row.emp_id
+    }));
+  }
+
+  async createSalesRent(insertSalesRent: InsertSalesRent): Promise<SalesRent> {
+    const res = await pool.query(
+      `INSERT INTO sales_rent
+        (ads_id, prod_id, customer_id, payment_date, payment_due_date, payment_status, leased_quantity, lease_amount, payment_frequency, payment_total_number, emp_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+       RETURNING *`,
+      [
+        insertSalesRent.adsId,
+        insertSalesRent.prodId ?? null,
+        insertSalesRent.customerId,
+        insertSalesRent.paymentDate,
+        insertSalesRent.paymentDueDate,
+        insertSalesRent.paymentStatus,
+        insertSalesRent.leasedQuantity,
+        insertSalesRent.leaseAmount,
+        insertSalesRent.paymentFrequency,
+        insertSalesRent.paymentTotalNumber,
+        insertSalesRent.empId ?? null
+      ]
+    );
+
+    const row = res.rows[0];
+    return {
+      id: row.id,
+      adsId: row.ads_id,
+      prodId: row.prod_id,
+      customerId: row.customer_id,
+      paymentDate: row.payment_date,
+      paymentDueDate: row.payment_due_date,
+      paymentStatus: row.payment_status,
+      leasedQuantity: row.leased_quantity,
+      leaseAmount: row.lease_amount,
+      paymentFrequency: row.payment_frequency,
+      paymentTotalNumber: row.payment_total_number,
+      empId: row.emp_id
+    };
   }
 
   // Analytics

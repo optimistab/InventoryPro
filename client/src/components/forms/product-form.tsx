@@ -94,7 +94,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       toast({
         title: "Success",
-        description: `Product created successfully!\nAds ID: ${product.adsId}\nReference: ${product.referenceNumber}`,
+        description: `Product created successfully!\nAds ID: ₹{product.adsId}\nReference: ₹{product.referenceNumber}`,
       });
       onSuccess();
     },
@@ -111,7 +111,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
   const updateProductMutation = useMutation({
     mutationFn: async (data: InsertProduct) => {
       if (!product) throw new Error("No product to update");
-      const response = await apiRequest("PUT", `/api/products/${product.id}`, data);
+      const response = await apiRequest("PUT", `/api/products/₹{product.id}`, data);
       return response.json();
     },
     onSuccess: () => {
@@ -272,7 +272,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             name="price"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price ($)</FormLabel>
+                <FormLabel>Price (₹)</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.01" placeholder="1999.99" {...field} />
                 </FormControl>
@@ -286,7 +286,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
             name="cost"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Cost ($)</FormLabel>
+                <FormLabel>Cost (₹)</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.01" placeholder="1499.99" {...field} />
                 </FormControl>

@@ -27,7 +27,7 @@ export default function ProductTimeline({ adsId, productName }: ProductTimelineP
   const queryClient = useQueryClient();
 
   const { data: events, isLoading } = useQuery<ProductDateEvent[]>({
-    queryKey: [`/api/product-date-events/product/${adsId}`],
+    queryKey: [`/api/product-date-events/product/₹{adsId}`],
   });
 
   const form = useForm<InsertProductDateEvent>({
@@ -43,7 +43,7 @@ export default function ProductTimeline({ adsId, productName }: ProductTimelineP
     mutationFn: (data: InsertProductDateEvent) => 
       apiRequest("/api/product-date-events", "POST", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/product-date-events/product/${adsId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/product-date-events/product/₹{adsId}`] });
       setIsAddEventOpen(false);
       form.reset({
         adsId,
@@ -158,7 +158,7 @@ export default function ProductTimeline({ adsId, productName }: ProductTimelineP
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg font-bold text-gray-900 flex items-center">
             <Calendar className="mr-2 h-5 w-5 text-gray-600" />
-            Product Timeline {productName && `- ${productName}`}
+            Product Timeline {productName && `- ₹{productName}`}
           </CardTitle>
           <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
             <DialogTrigger asChild>
@@ -261,7 +261,7 @@ export default function ProductTimeline({ adsId, productName }: ProductTimelineP
           <div className="space-y-4">
             {sortedEvents.map((event, index) => (
               <div key={event.id} className="flex items-start space-x-3">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${getEventColor(event.eventType)}`}>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center ₹{getEventColor(event.eventType)}`}>
                   {getEventIcon(event.eventType)}
                 </div>
                 <div className="flex-1 min-w-0">

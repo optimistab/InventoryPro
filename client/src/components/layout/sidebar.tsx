@@ -22,8 +22,10 @@ interface SidebarProps {
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
   { name: "Inventory", href: "/inventory", icon: Package },
-  { name: "Customer", href: "/clients", icon: Users },
+  { name: "Orders", href: "/orders", icon: FileText },
   { name: "Sales and Revenue", href: "/sales", icon: ShoppingCart },
+  { name: "Purchase", href: "/purchase", icon: Recycle },
+  { name: "Customer Info", href: "/clients", icon: Users },
 ];
 
 export default function Sidebar({ isMobileOpen, onMobileClose }: SidebarProps) {

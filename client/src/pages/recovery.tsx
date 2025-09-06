@@ -133,7 +133,7 @@ export default function Recovery() {
               <CardTitle className="text-sm font-medium text-gray-600">Est. Value</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">${totalValue.toLocaleString()}</p>
+              <p className="text-2xl font-bold">₹{totalValue.toLocaleString()}</p>
             </CardContent>
           </Card>
         </div>
@@ -228,7 +228,7 @@ export default function Recovery() {
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-600">Est. Value:</span>
                           <span className="font-semibold text-success">
-                            ${parseFloat(item.estimatedValue).toLocaleString()}
+                            ₹{parseFloat(item.estimatedValue).toLocaleString()}
                           </span>
                         </div>
                       )}
@@ -237,7 +237,7 @@ export default function Recovery() {
                         <div className="flex justify-between items-center">
                           <span className="text-sm text-gray-600">Repair Cost:</span>
                           <span className="font-semibold text-error">
-                            ${parseFloat(item.repairCost).toLocaleString()}
+                            ₹{parseFloat(item.repairCost).toLocaleString()}
                           </span>
                         </div>
                       )}

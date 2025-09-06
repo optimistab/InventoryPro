@@ -95,7 +95,7 @@ export default function AlertsCard({ products, isLoading }: AlertsCardProps) {
           {alerts.map((alert) => {
             const Icon = alert.icon;
             return (
-              <div 
+              <div
                 key={alert.id}
                 className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
               >
@@ -105,7 +105,7 @@ export default function AlertsCard({ products, isLoading }: AlertsCardProps) {
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-900">{alert.title}</span>
-                    <Badge 
+                    <Badge
                       variant={alert.count > 0 ? "default" : "secondary"}
                       className={`text-xs ${alert.count > 0 ? alert.color : 'bg-gray-100 text-gray-600'}`}
                     >

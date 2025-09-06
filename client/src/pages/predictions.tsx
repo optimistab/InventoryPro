@@ -167,7 +167,7 @@ export default function Predictions() {
                   <CardTitle className="text-sm font-medium text-gray-600">Daily Average</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-2xl font-bold">${predictions.avgDailyRevenue.toFixed(0)}</p>
+                  <p className="text-2xl font-bold">₹{predictions.avgDailyRevenue.toFixed(0)}</p>
                   <p className="text-sm text-gray-600 mt-1">Based on {timeframe} days</p>
                 </CardContent>
               </Card>
@@ -178,7 +178,7 @@ export default function Predictions() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-2xl font-bold text-primary">
-                    ${predictions.projectedMonthlyRevenue.toFixed(0)}
+                    ₹{predictions.projectedMonthlyRevenue.toFixed(0)}
                   </p>
                   <p className="text-sm text-gray-600 mt-1">Projected revenue</p>
                 </CardContent>
@@ -230,7 +230,7 @@ export default function Predictions() {
                             </div>
                           </div>
                           <p className="font-semibold text-success">
-                            ${item.totalRevenue.toLocaleString()}
+                            ₹{item.totalRevenue.toLocaleString()}
                           </p>
                         </div>
                       ))}
@@ -319,7 +319,7 @@ export default function Predictions() {
                   
                   <div className="text-center p-4 bg-purple-50 rounded-lg">
                     <p className="text-2xl font-bold text-purple-600">
-                      ${Math.round(predictions.avgDailyRevenue * 365)}
+                      ₹{Math.round(predictions.avgDailyRevenue * 365)}
                     </p>
                     <p className="text-sm text-gray-600">Annual projection</p>
                   </div>

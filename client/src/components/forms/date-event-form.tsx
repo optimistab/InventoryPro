@@ -32,7 +32,7 @@ export default function DateEventForm({ adsId, onSuccess }: DateEventFormProps) 
     mutationFn: (data: InsertProductDateEvent) => 
       apiRequest("/api/product-date-events", "POST", data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/product-date-events/product/${adsId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/product-date-events/product/₹{adsId}`] });
       queryClient.invalidateQueries({ queryKey: ["/api/product-date-events"] });
       form.reset({
         adsId,

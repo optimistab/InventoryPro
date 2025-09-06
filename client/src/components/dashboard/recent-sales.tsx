@@ -107,7 +107,7 @@ export default function RecentSales({ sales, isLoading }: RecentSalesProps) {
                     <p className="text-gray-600 text-sm">{sale.client.email}</p>
                   </td>
                   <td className="py-3 px-2 font-semibold text-gray-900">
-                    ${parseFloat(sale.totalAmount).toLocaleString()}
+                    ₹{parseFloat(sale.totalAmount).toLocaleString()}
                   </td>
                   <td className="py-3 px-2 text-gray-600">
                     {new Date(sale.saleDate).toLocaleDateString()}

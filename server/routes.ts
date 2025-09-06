@@ -8,6 +8,9 @@ import {
   insertClientRequirementSchema,
   insertRecoveryItemSchema,
   insertProductDateEventSchema,
+  insertOrderSchema,
+  insertSalesBuySchema,
+  insertSalesRentSchema,
   EVENT_TYPES
 } from "@shared/schema";
 import passport from "passport";
@@ -505,6 +508,106 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(204).send();
     } catch (error) {
       res.status(500).json({ message: "Failed to delete sale" });
+    }
+  });
+
+  // Orders routes
+  app.get("/api/orders", async (req, res) => {
+    try {
+      const orders = await storage.getOrders();
+      res.json(orders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  app.get("/api/orders/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const order = await storage.getOrder(id);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      res.json(order);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch order" });
+    }
+  });
+
+  app.post("/api/orders", async (req, res) => {
+    try {
+      const orderData = insertOrderSchema.parse(req.body);
+      const order = await storage.createOrder(orderData);
+      res.status(201).json(order);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid order data" });
+    }
+  });
+
+  app.put("/api/orders/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const orderData = insertOrderSchema.partial().parse(req.body);
+      const order = await storage.updateOrder(id, orderData);
+      if (!order) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      res.json(order);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid order data" });
+    }
+  });
+
+  app.delete("/api/orders/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const deleted = await storage.deleteOrder(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Order not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete order" });
+    }
+  });
+
+  // Sales Buy routes
+  app.get("/api/sales-buy", async (req, res) => {
+    try {
+      const salesBuy = await storage.getSalesBuy();
+      res.json(salesBuy);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch sales buy records" });
+    }
+  });
+
+  app.post("/api/sales-buy", async (req, res) => {
+    try {
+      const salesBuyData = insertSalesBuySchema.parse(req.body);
+      const salesBuy = await storage.createSalesBuy(salesBuyData);
+      res.status(201).json(salesBuy);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid sales buy data" });
+    }
+  });
+
+  // Sales Rent routes
+  app.get("/api/sales-rent", async (req, res) => {
+    try {
+      const salesRent = await storage.getSalesRent();
+      res.json(salesRent);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch sales rent records" });
+    }
+  });
+
+  app.post("/api/sales-rent", async (req, res) => {
+    try {
+      const salesRentData = insertSalesRentSchema.parse(req.body);
+      const salesRent = await storage.createSalesRent(salesRentData);
+      res.status(201).json(salesRent);
+    } catch (error) {
+      res.status(400).json({ message: "Invalid sales rent data" });
     }
   });
 

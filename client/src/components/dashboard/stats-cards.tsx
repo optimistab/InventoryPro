@@ -63,7 +63,7 @@ export default function StatsCards({ stats, isLoading }: StatsCardsProps) {
     },
     {
       title: "Monthly Sales",
-      value: `$${stats.monthlySales.toLocaleString()}`,
+      value: `₹${stats.monthlySales.toLocaleString()}`,
       change: `${stats.salesGrowth > 0 ? '+' : ''}${stats.salesGrowth}% from last month`,
       icon: DollarSign,
       iconBg: "bg-green-100",

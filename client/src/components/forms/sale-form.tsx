@@ -130,7 +130,7 @@ export default function SaleForm({ onSuccess, onCancel }: SaleFormProps) {
                   <SelectContent>
                     {products?.filter(p => p.stockQuantity > 0).map((product) => (
                       <SelectItem key={product.adsId} value={product.adsId}>
-                        {product.name} - ${product.price} (Stock: {product.stockQuantity})
+                        {product.name} - ₹{product.price} (Stock: {product.stockQuantity})
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -171,7 +171,7 @@ export default function SaleForm({ onSuccess, onCancel }: SaleFormProps) {
             name="unitPrice"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Unit Price ($)</FormLabel>
+                <FormLabel>Unit Price (₹)</FormLabel>
                 <FormControl>
                   <Input 
                     type="number" 
@@ -195,7 +195,7 @@ export default function SaleForm({ onSuccess, onCancel }: SaleFormProps) {
             name="totalAmount"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Total Amount ($)</FormLabel>
+                <FormLabel>Total Amount (₹)</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.01" readOnly {...field} />
                 </FormControl>

@@ -61,21 +61,16 @@ async function resetDatabase() {
 
     console.log('📦 Recreating database schema...');
 
-    // Run SQL migrations directly
-    const migrationFiles = [
-      '0000_outstanding_lilandra.sql'
-    ];
-
-    for (const file of migrationFiles) {
-      const filePath = path.join(process.cwd(), 'migrations', file);
-      if (fs.existsSync(filePath)) {
-        const sql = fs.readFileSync(filePath, 'utf8');
-        console.log(`Running migration: ${file}`);
-        await db.execute(sql);
-      }
+    // Use drizzle-kit push to apply current schema
+    console.log('🔄 Pushing current schema to database...');
+    const { execSync } = await import('child_process');
+    try {
+      execSync('npm run db:push', { stdio: 'inherit' });
+      console.log('✅ Database schema pushed successfully');
+    } catch (pushError) {
+      console.error('❌ Failed to push schema:', pushError);
+      throw pushError;
     }
-
-    console.log('✅ Database schema recreated successfully');
 
     // Create users (always, in both development and production)
     console.log('👥 Creating users...');

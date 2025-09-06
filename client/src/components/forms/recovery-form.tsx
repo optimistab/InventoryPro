@@ -194,7 +194,7 @@ export default function RecoveryForm({ onSuccess, onCancel }: RecoveryFormProps)
             name="estimatedValue"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Estimated Value ($)</FormLabel>
+                <FormLabel>Estimated Value (₹)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"
@@ -215,7 +215,7 @@ export default function RecoveryForm({ onSuccess, onCancel }: RecoveryFormProps)
             name="repairCost"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Repair Cost ($)</FormLabel>
+                <FormLabel>Repair Cost (₹)</FormLabel>
                 <FormControl>
                   <Input
                     type="number"

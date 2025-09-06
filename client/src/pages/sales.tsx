@@ -4,15 +4,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Plus, Receipt, Laptop, Monitor } from "lucide-react";
+import { Search, Plus, Receipt, Laptop, Monitor, CreditCard } from "lucide-react";
 import { useState } from "react";
 import SaleForm from "@/components/forms/sale-form";
+import PaymentForm from "@/components/forms/payment-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { SaleWithDetails } from "@shared/schema";
 
 export default function Sales() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isSaleFormOpen, setIsSaleFormOpen] = useState(false);
+  const [isPaymentFormOpen, setIsPaymentFormOpen] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<string>("");
 
   const { data: sales, isLoading } = useQuery<SaleWithDetails[]>({
     queryKey: ["/api/sales"],
@@ -94,7 +97,7 @@ export default function Sales() {
               <CardTitle className="text-sm font-medium text-gray-600">Total Revenue</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">${totalSales.toLocaleString()}</p>
+              <p className="text-2xl font-bold">₹{totalSales.toLocaleString()}</p>
             </CardContent>
           </Card>
           <Card>
@@ -103,7 +106,7 @@ export default function Sales() {
             </CardHeader>
             <CardContent>
               <p className="text-2xl font-bold">
-                ${filteredSales.length > 0 ? (totalSales / filteredSales.length).toFixed(0) : '0'}
+                ₹{filteredSales.length > 0 ? (totalSales / filteredSales.length).toFixed(0) : '0'}
               </p>
             </CardContent>
           </Card>
@@ -179,13 +182,13 @@ export default function Sales() {
                       
                       <div className="text-right">
                         <p className="text-sm text-gray-600">Unit Price</p>
-                        <p className="font-semibold">${parseFloat(sale.unitPrice).toLocaleString()}</p>
+                        <p className="font-semibold">₹{parseFloat(sale.unitPrice).toLocaleString()}</p>
                       </div>
                       
                       <div className="text-right">
                         <p className="text-sm text-gray-600">Total</p>
                         <p className="text-lg font-bold text-gray-900">
-                          ${parseFloat(sale.totalAmount).toLocaleString()}
+                          ₹{parseFloat(sale.totalAmount).toLocaleString()}
                         </p>
                       </div>
                       
@@ -194,18 +197,32 @@ export default function Sales() {
                         <p className="font-medium">{new Date(sale.saleDate).toLocaleDateString()}</p>
                       </div>
                       
-                      <Badge 
-                        variant={sale.status === "completed" ? "default" : "secondary"}
-                        className={
-                          sale.status === "completed" 
-                            ? "bg-green-100 text-success hover:bg-green-100" 
-                            : sale.status === "pending"
-                            ? "bg-yellow-100 text-warning hover:bg-yellow-100"
-                            : "bg-red-100 text-error hover:bg-red-100"
-                        }
-                      >
-                        {sale.status}
-                      </Badge>
+                      <div className="flex flex-col items-end space-y-2">
+                        <Badge
+                          variant={sale.status === "completed" ? "default" : "secondary"}
+                          className={
+                            sale.status === "completed"
+                              ? "bg-green-100 text-success hover:bg-green-100"
+                              : sale.status === "pending"
+                              ? "bg-yellow-100 text-warning hover:bg-yellow-100"
+                              : "bg-red-100 text-error hover:bg-red-100"
+                          }
+                        >
+                          {sale.status}
+                        </Badge>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            // TODO: Link to order for payment
+                            setSelectedOrderId(`ORD₹{sale.clientId}001`); // Placeholder
+                            setIsPaymentFormOpen(true);
+                          }}
+                        >
+                          <CreditCard className="h-4 w-4 mr-1" />
+                          Record Payment
+                        </Button>
+                      </div>
                     </div>
                   </div>
                   
@@ -230,6 +247,20 @@ export default function Sales() {
           <SaleForm
             onSuccess={() => setIsSaleFormOpen(false)}
             onCancel={() => setIsSaleFormOpen(false)}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Record Payment Dialog */}
+      <Dialog open={isPaymentFormOpen} onOpenChange={setIsPaymentFormOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Record Payment</DialogTitle>
+          </DialogHeader>
+          <PaymentForm
+            orderId={selectedOrderId}
+            onSuccess={() => setIsPaymentFormOpen(false)}
+            onCancel={() => setIsPaymentFormOpen(false)}
           />
         </DialogContent>
       </Dialog>

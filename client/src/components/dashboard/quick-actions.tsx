@@ -81,8 +81,8 @@ export default function QuickActions() {
                 onClick={() => setActiveDialog(action.id)}
                 variant={action.primary ? "default" : "outline"}
                 className={`w-full flex items-center justify-between p-3 h-auto ${
-                  action.primary 
-                    ? "bg-primary text-white hover:bg-blue-700" 
+                  action.primary
+                    ? "bg-primary text-white hover:bg-blue-700"
                     : "border border-gray-300 hover:bg-gray-50"
                 }`}
               >
@@ -108,7 +108,7 @@ export default function QuickActions() {
             return (
               <Alert key={alert.id} className={alert.color}>
                 <div className="flex items-start space-x-3">
-                  <Icon className={`${alert.iconColor} mt-1 h-4 w-4`} />
+                  <Icon className={`mt-1 h-4 w-4 ${alert.iconColor}`} />
                   <div>
                     <p className={`font-medium text-sm ${alert.iconColor}`}>{alert.title}</p>
                     <AlertDescription className="text-gray-600 text-xs">

@@ -30,7 +30,7 @@ export default function Inventory() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
+      const res = await fetch(`/api/products/₹{id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Failed to delete product");
     },
     onSuccess: () => {
@@ -272,7 +272,7 @@ export default function Inventory() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <span className="font-semibold">${parseFloat(product.price).toLocaleString()}</span>
+                        <span className="font-semibold">₹{parseFloat(product.price).toLocaleString()}</span>
                       </TableCell>
                       <TableCell>
                         <Badge 
