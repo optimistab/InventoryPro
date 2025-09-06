@@ -50,7 +50,6 @@ export const clients = pgTable("clients", {
   zipCode: text("zip_code"),
   company: text("company"),
   isActive: boolean("is_active").notNull().default(true),
-  // New customer information fields
   cxType: text("cx_type"), // "Retail", "ORG"
   gst: text("gst"), // 15-digit GST number
   idProof: text("id_proof"), // "Aadhar", "PAN"
@@ -181,12 +180,15 @@ export const salesRent = pgTable("sales_rent", {
   empId: text("emp_id"), // Employee ID
 });
 
-// Users table
+// Users table with employee ID system
+// Employee IDs are auto-generated in ADS0001 format during user creation
+// Database resets on every npm run dev - see README.md for details
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   role: text("role").notNull(), // e.g., "admin", "manager", "staff"
+  employeeId: text("employee_id").unique(), // ADS0001, ADS0002, etc. - auto-generated
   dateOfCreation: text("date_of_creation").notNull(), // ISO date string
   isActive: boolean("is_active").notNull().default(true), // Only active users can login
 });

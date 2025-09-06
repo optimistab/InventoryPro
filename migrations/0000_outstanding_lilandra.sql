@@ -23,6 +23,12 @@ CREATE TABLE "clients" (
 	"zip_code" text,
 	"company" text,
 	"is_active" boolean DEFAULT true NOT NULL,
+	"cx_type" text,
+	"gst" text,
+	"id_proof" text,
+	"website" text,
+	"address_proof" text,
+	"repeat_cx" text,
 	CONSTRAINT "clients_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
@@ -52,6 +58,16 @@ CREATE TABLE "products" (
 	"specifications" text,
 	"description" text,
 	"is_active" boolean DEFAULT true NOT NULL,
+	"prod_id" text,
+	"prod_health" text,
+	"prod_status" text,
+	"last_audit_date" text,
+	"audit_status" text,
+	"return_date" text,
+	"maintenance_date" text,
+	"maintenance_status" text,
+	"order_status" text,
+	"created_by" text,
 	CONSTRAINT "products_sku_unique" UNIQUE("sku"),
 	CONSTRAINT "products_ads_id_unique" UNIQUE("ads_id"),
 	CONSTRAINT "products_reference_number_unique" UNIQUE("reference_number")
@@ -89,12 +105,17 @@ CREATE TABLE "session" (
 	"expire" timestamp NOT NULL
 );
 --> statement-breakpoint
+-- Users table with employee ID system
+-- Employee IDs are auto-generated in ADS0001 format during user creation
+-- See scripts/createUsers.ts for employee ID generation logic
 CREATE TABLE "users" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"username" text NOT NULL,
 	"password" text NOT NULL,
 	"role" text NOT NULL,
+	"employee_id" text,
 	"date_of_creation" text NOT NULL,
 	"is_active" boolean DEFAULT true NOT NULL,
-	CONSTRAINT "users_username_unique" UNIQUE("username")
+	CONSTRAINT "users_username_unique" UNIQUE("username"),
+	CONSTRAINT "users_employee_id_unique" UNIQUE("employee_id")
 );

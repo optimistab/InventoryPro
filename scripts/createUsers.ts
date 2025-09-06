@@ -82,6 +82,11 @@ async function createUsers() {
   }
 }
 
+// EMPLOYEE ID GENERATION SYSTEM
+// Employee IDs are generated in ADS0001 format (sequential)
+// This runs automatically during database setup and deployment
+// See README.md for database reset strategy documentation
+
 // Export a function for automatic user creation during deployment
 export async function createUsersIfNeeded() {
   let client;
@@ -143,19 +148,24 @@ export async function createUsersIfNeeded() {
 
     // Hash passwords and insert users
     console.log("👥 Creating users...");
+    let employeeIdCounter = 1;
     for (const user of allUsers) {
       try {
         // Hash the password
         const hashedPassword = await bcrypt.hash(user.password, 10);
 
+        // Generate employee ID
+        const employeeId = `ADS${String(employeeIdCounter).padStart(4, '0')}`;
+
         // Insert user into database using raw SQL
         await client.query(
-          `INSERT INTO users (username, password, role, date_of_creation, is_active)
-           VALUES ($1, $2, $3, $4, $5)`,
-          [user.username, hashedPassword, user.role, new Date().toISOString(), true]
+          `INSERT INTO users (username, password, role, employee_id, date_of_creation, is_active)
+           VALUES ($1, $2, $3, $4, $5, $6)`,
+          [user.username, hashedPassword, user.role, employeeId, new Date().toISOString(), true]
         );
 
-        console.log(`✅ Created user: ${user.username} (${user.role})`);
+        console.log(`✅ Created user: ${user.username} (${user.role}) - Employee ID: ${employeeId}`);
+        employeeIdCounter++;
       } catch (userError) {
         console.error(`❌ Failed to create user ${user.username}:`, userError);
         // Continue with other users even if one fails

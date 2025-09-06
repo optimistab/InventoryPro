@@ -7,6 +7,22 @@ import { users, clients, products } from '../shared/schema';
 // Load environment variables
 dotenv.config();
 
+/**
+ * DATABASE RESET STRATEGY
+ *
+ * This script resets the entire database on every run (npm run dev / deployment).
+ * This approach is used because:
+ * - Schema changes happen frequently during development
+ * - No need for migration scripts/backward compatibility
+ * - Clean state for each development session
+ * - Simple schema updates: just modify migrations/0000_outstanding_lilandra.sql
+ *
+ * Process:
+ * 1. Drop existing database
+ * 2. Run base migration (0000_outstanding_lilandra.sql)
+ * 3. Seed initial data
+ * 4. Create users with auto-generated employee IDs (ADS0001 format)
+ */
 async function setupDatabase() {
   console.log('🚀 Setting up database for development...');
 
@@ -76,6 +92,7 @@ async function setupDatabase() {
         username: 'admin',
         password: '$2b$10$8K3VzJcQX8zJcQX8zJcQX8zJcQX8zJcQX8zJcQX8zJcQX8zJcQX8', // 'admin123' hashed
         role: 'admin',
+        employeeId: 'ADS0001',
         dateOfCreation: new Date().toISOString(),
         isActive: true,
       });
