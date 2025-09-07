@@ -36,11 +36,19 @@ export default function AlertsCard({ products, isLoading }: AlertsCardProps) {
     );
   }
 
-  // Calculate alert counts
-  const lowInventoryCount = products?.filter(p => p.stockQuantity > 0 && p.stockQuantity <= 10).length || 0;
-  const recoveryDueCount = 2; // Mock data - would come from recovery items API
-  const complaintsCount = 0; // Mock data - would come from complaints API
-  const repairsCount = 1; // Mock data - would come from repairs API
+  // Calculate alert counts based on product status
+  const lowInventoryCount = products?.filter(p =>
+    p.prodStatus === 'available' || p.prodStatus === 'returned'
+  ).length || 0;
+  const recoveryDueCount = products?.filter(p =>
+    p.prodStatus === 'leased but not working' || p.prodStatus === 'maintenance'
+  ).length || 0;
+  const complaintsCount = products?.filter(p =>
+    p.prodHealth === 'maintenance' || p.prodStatus === 'leased but maintenance'
+  ).length || 0;
+  const repairsCount = products?.filter(p =>
+    p.prodHealth === 'maintenance' || p.prodStatus === 'leased but maintenance'
+  ).length || 0;
 
   const alerts = [
     {

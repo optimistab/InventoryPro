@@ -4,20 +4,16 @@ import { storage } from "./storage";
 import {
   insertProductSchema,
   insertClientSchema,
-  insertSaleSchema,
-  insertClientRequirementSchema,
-  insertRecoveryItemSchema,
   insertProductDateEventSchema,
-  insertOrderSchema,
+  baseInsertOrderSchema,
   insertSalesBuySchema,
-  insertSalesRentSchema,
-  EVENT_TYPES
+  insertSalesRentSchema
 } from "@shared/schema";
+import { ENUMS, getEnumValues, getEnumOptions } from "@shared/enums";
 import passport from "passport";
 import pool from "../db";
 import bcrypt from "bcrypt";
 import { drizzle } from "drizzle-orm/node-postgres";
-import { migrate } from "drizzle-orm/node-postgres/migrator";
 import multer from "multer";
 import csv from "csv-parser";
 import * as XLSX from "xlsx";
@@ -45,37 +41,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/products/sample-csv", (req, res) => {
     const sampleData = [
       {
-        name: "MacBook Pro 16-inch",
-        sku: "MBP16-001",
         brand: "Apple",
         model: "MacBook Pro",
         category: "laptop",
         condition: "new",
-        price: "2499.99",
-        cost: "1999.99",
-        stockQuantity: "5",
+        costPrice: "1999.99",
         specifications: "16GB RAM, 512GB SSD, M2 Pro chip",
-        description: "Professional laptop for creative work"
+        prodId: "MBP001",
+        prodHealth: "working",
+        prodStatus: "available",
+        orderStatus: "INVENTORY",
+        createdBy: "ADS0001"
       },
       {
-        name: "Dell XPS 13",
-        sku: "DXPS13-002",
         brand: "Dell",
         model: "XPS 13",
         category: "laptop",
         condition: "refurbished",
-        price: "899.99",
-        cost: "699.99",
-        stockQuantity: "3",
+        costPrice: "699.99",
         specifications: "8GB RAM, 256GB SSD, Intel i5",
-        description: "Compact ultrabook for business"
+        prodId: "DXPS001",
+        prodHealth: "working",
+        prodStatus: "available",
+        orderType: "INVENTORY",
+        createdBy: "ADS0001"
       }
     ];
 
     const csvContent = [
-      'name,sku,brand,model,category,condition,price,cost,stockQuantity,specifications,description',
+      'brand,model,condition,costPrice,specifications,prodId,prodHealth,prodStatus,orderType,productType,createdBy',
       ...sampleData.map(row =>
-        `"${row.name}","${row.sku}","${row.brand}","${row.model}","${row.category}","${row.condition}","${row.price}","${row.cost}","${row.stockQuantity}","${row.specifications}","${row.description}"`
+        `"${row.brand}","${row.model}","${row.condition}","${row.costPrice}","${row.specifications}","${row.prodId}","${row.prodHealth}","${row.prodStatus}","${row.orderStatus}","laptop","${row.createdBy}"`
       )
     ].join('\n');
 
@@ -127,60 +123,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const row = products[i];
         try {
           // Map CSV/Excel columns to our schema
-          const productData = {
-            name: row.name || row.Name,
-            sku: row.sku || row.SKU,
+          const productData: any = {
             brand: row.brand || row.Brand,
             model: row.model || row.Model,
-            category: row.category || row.Category || 'laptop',
             condition: row.condition || row.Condition || 'new',
-            price: (row.price || row.Price || '0').toString(),
-            cost: (row.cost || row.Cost || '0').toString(),
-            stockQuantity: parseInt(row.stockQuantity || row.StockQuantity || row.stock_quantity || '0'),
+            costPrice: (row.costPrice || row.cost || row.Cost || '0').toString(),
             specifications: row.specifications || row.Specifications || null,
-            description: row.description || row.Description || null,
-            isActive: true
+            prodId: row.prodId || row.prod_id || null,
+            prodHealth: row.prodHealth || row.prod_health || 'working',
+            prodStatus: row.prodStatus || row.prod_status || 'available',
+            lastAuditDate: row.lastAuditDate || row.last_audit_date || null,
+            auditStatus: row.auditStatus || row.audit_status || null,
+            returnDate: row.returnDate || row.return_date || null,
+            maintenanceDate: row.maintenanceDate || row.maintenance_date || null,
+            maintenanceStatus: row.maintenanceStatus || row.maintenance_status || null,
+            orderType: row.orderType || row.order_type || row.orderStatus || row.order_status || 'INVENTORY',
+            productType: row.productType || row.product_type || 'laptop',
+            createdBy: row.createdBy || row.created_by || null,
           };
 
           // Validate required fields
-          if (!productData.name || !productData.sku || !productData.brand) {
-            errors.push(`Row ${i + 1}: Missing required fields (name, sku, brand)`);
+          if (!productData.brand || !productData.model) {
+            errors.push(`Row ${i + 1}: Missing required fields (brand, model)`);
             continue;
           }
 
           // Validate and convert data types
-          const price = parseFloat(productData.price);
-          const cost = parseFloat(productData.cost);
-          const stockQuantity = productData.stockQuantity;
+          const costPrice = parseFloat(productData.costPrice);
 
-          if (isNaN(price) || price < 0) {
-            errors.push(`Row ${i + 1}: Invalid price`);
+          if (isNaN(costPrice) || costPrice < 0) {
+            errors.push(`Row ${i + 1}: Invalid cost price`);
             continue;
           }
 
-          if (isNaN(cost) || cost < 0) {
-            errors.push(`Row ${i + 1}: Invalid cost`);
-            continue;
-          }
-
-          if (isNaN(stockQuantity) || stockQuantity < 0) {
-            errors.push(`Row ${i + 1}: Invalid stock quantity`);
-            continue;
-          }
+          // Generate adsId for the product
+          const timestamp = Date.now().toString().slice(-6); // Last 6 digits of timestamp
+          const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0'); // 4-digit random
+          productData.adsId = `${timestamp}${random}`;
 
           // Update the product data with properly typed values
-          productData.price = price.toFixed(2);
-          productData.cost = cost.toFixed(2);
-          productData.stockQuantity = stockQuantity;
+          productData.costPrice = costPrice.toFixed(2);
 
-          // Validate category and condition
-          if (!['laptop', 'desktop'].includes(productData.category)) {
-            errors.push(`Row ${i + 1}: Invalid category (must be 'laptop' or 'desktop')`);
+          // Validate condition
+          if (!['new', 'refurbished', 'used'].includes(productData.condition)) {
+            errors.push(`Row ${i + 1}: Invalid condition (must be 'new', 'refurbished', or 'used')`);
             continue;
           }
 
           if (!['new', 'refurbished', 'used'].includes(productData.condition)) {
             errors.push(`Row ${i + 1}: Invalid condition (must be 'new', 'refurbished', or 'used')`);
+            continue;
+          }
+
+          // Validate prodHealth
+          if (!['working', 'maintenance', 'expired'].includes(productData.prodHealth)) {
+            errors.push(`Row ${i + 1}: Invalid prodHealth (must be 'working', 'maintenance', or 'expired')`);
+            continue;
+          }
+
+          // Validate prodStatus
+          const validProdStatuses = ['leased', 'sold', 'leased but not working', 'leased but maintenance', 'available', 'returned'];
+          if (!validProdStatuses.includes(productData.prodStatus)) {
+            errors.push(`Row ${i + 1}: Invalid prodStatus (must be one of: ${validProdStatuses.join(', ')})`);
+            continue;
+          }
+
+          // Validate orderStatus
+          if (!['RENT', 'PURCHASE', 'INVENTORY'].includes(productData.orderType)) {
+            errors.push(`Row ${i + 1}: Invalid orderStatus (must be 'RENT', 'PURCHASE', or 'INVENTORY')`);
+            continue;
+          }
+
+          // Validate productType
+          if (!['laptop', 'desktop'].includes(productData.productType)) {
+            errors.push(`Row ${i + 1}: Invalid productType (must be 'laptop' or 'desktop')`);
             continue;
           }
 
@@ -258,28 +274,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const rawData = req.body;
       const processedData = {
         ...rawData,
-        // Ensure price and cost are valid decimal strings
-        price: (() => {
-          const price = rawData.price;
-          if (typeof price === 'string') return price;
-          if (typeof price === 'number') return price.toString();
+        // Ensure costPrice is valid decimal string
+        costPrice: (() => {
+          const costPrice = rawData.costPrice || rawData.cost;
+          if (typeof costPrice === 'string') return costPrice;
+          if (typeof costPrice === 'number') return costPrice.toString();
           return '0';
         })(),
-        cost: (() => {
-          const cost = rawData.cost;
-          if (typeof cost === 'string') return cost;
-          if (typeof cost === 'number') return cost.toString();
-          return '0';
-        })(),
-        stockQuantity: (() => {
-          if (typeof rawData.stockQuantity === 'number') return rawData.stockQuantity;
-          if (typeof rawData.stockQuantity === 'string') {
-            const parsed = parseInt(rawData.stockQuantity);
-            return isNaN(parsed) ? 0 : parsed;
-          }
-          return 0;
-        })(),
-        isActive: rawData.isActive !== undefined ? Boolean(rawData.isActive) : true,
+        createdBy: rawData.createdBy || null,
+        prodId: rawData.prodId || null,
+        prodHealth: rawData.prodHealth || null,
+        prodStatus: rawData.prodStatus || 'available',
+        lastAuditDate: rawData.lastAuditDate || null,
+        auditStatus: rawData.auditStatus || null,
+        returnDate: rawData.returnDate || null,
+        maintenanceDate: rawData.maintenanceDate || null,
+        maintenanceStatus: rawData.maintenanceStatus || null,
+        orderType: rawData.orderType || rawData.orderStatus || 'INVENTORY',
       };
 
       console.log('Raw data:', rawData);
@@ -292,9 +303,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Automatically track product addition date
       await storage.createProductDateEvent({
         adsId: product.adsId,
-        eventType: EVENT_TYPES.PRODUCT_ADDED,
+        eventType: ENUMS.EVENT_TYPES.PRODUCT_ADDED,
         eventDate: new Date().toISOString(),
-        notes: `Product ${product.name} added to inventory`,
+        notes: `Product ${product.brand} ${product.model} added to inventory`,
         createdAt: new Date().toISOString()
       });
       console.log("Product date event created successfully");
@@ -311,42 +322,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/products/:id", async (req, res) => {
+  app.put("/api/products/:adsId", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const adsId = req.params.adsId;
 
       // Preprocess the data to ensure correct types
       const rawData = req.body;
       const processedData = {
         ...rawData,
-        price: rawData.price !== undefined ? (() => {
-          const price = rawData.price;
-          if (typeof price === 'string') return price;
-          if (typeof price === 'number') return price.toString();
+        costPrice: rawData.costPrice !== undefined ? (() => {
+          const costPrice = rawData.costPrice;
+          if (typeof costPrice === 'string') return costPrice;
+          if (typeof costPrice === 'number') return costPrice.toString();
           return undefined;
         })() : undefined,
-        cost: rawData.cost !== undefined ? (() => {
-          const cost = rawData.cost;
-          if (typeof cost === 'string') return cost;
-          if (typeof cost === 'number') return cost.toString();
-          return undefined;
-        })() : undefined,
-        stockQuantity: rawData.stockQuantity !== undefined ? (() => {
-          if (typeof rawData.stockQuantity === 'number') return rawData.stockQuantity;
-          if (typeof rawData.stockQuantity === 'string') {
-            const parsed = parseInt(rawData.stockQuantity);
-            return isNaN(parsed) ? undefined : parsed;
-          }
-          return undefined;
-        })() : undefined,
-        isActive: rawData.isActive !== undefined ? Boolean(rawData.isActive) : undefined,
+        createdBy: rawData.createdBy || undefined,
+        prodId: rawData.prodId || undefined,
+        prodHealth: rawData.prodHealth || undefined,
+        prodStatus: rawData.prodStatus || undefined,
+        lastAuditDate: rawData.lastAuditDate || undefined,
+        auditStatus: rawData.auditStatus || undefined,
+        returnDate: rawData.returnDate || undefined,
+        maintenanceDate: rawData.maintenanceDate || undefined,
+        maintenanceStatus: rawData.maintenanceStatus || undefined,
+        orderType: rawData.orderType || rawData.orderStatus || undefined,
       };
 
       console.log('PUT Raw data:', rawData);
       console.log('PUT Processed data:', processedData);
 
       const productData = insertProductSchema.partial().parse(processedData);
-      const product = await storage.updateProduct(id, productData);
+      const product = await storage.updateProductByAdsId(adsId, productData);
       if (!product) {
         return res.status(404).json({ message: "Product not found" });
       }
@@ -435,81 +441,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Sales routes
-  app.get("/api/sales", async (req, res) => {
-    try {
-      const sales = await storage.getSalesWithDetails();
-      res.json(sales);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch sales" });
-    }
-  });
-
-  app.get("/api/sales/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const sale = await storage.getSale(id);
-      if (!sale) {
-        return res.status(404).json({ message: "Sale not found" });
-      }
-      res.json(sale);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch sale" });
-    }
-  });
-
-  app.post("/api/sales", async (req, res) => {
-    try {
-      const saleData = insertSaleSchema.parse(req.body);
-      const sale = await storage.createSale(saleData);
-      
-      // Get product to check if this is first sale or resale
-      const product = await storage.getProductByAdsId(sale.adsId);
-      const existingSales = await storage.getSalesByProduct(sale.adsId);
-      const isFirstSale = existingSales.length === 1; // Just created this sale
-
-      // Automatically track sale event
-      await storage.createProductDateEvent({
-        adsId: sale.adsId,
-        clientId: sale.clientId,
-        eventType: isFirstSale ? EVENT_TYPES.FIRST_SALE : EVENT_TYPES.RESALE_TO_CUSTOMER,
-        eventDate: sale.saleDate,
-        notes: `Product sold to customer${product ? ` - ${product.name}` : ''}`,
-        createdAt: new Date().toISOString()
-      });
-      
-      res.status(201).json(sale);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid sale data" });
-    }
-  });
-
-  app.put("/api/sales/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const saleData = insertSaleSchema.partial().parse(req.body);
-      const sale = await storage.updateSale(id, saleData);
-      if (!sale) {
-        return res.status(404).json({ message: "Sale not found" });
-      }
-      res.json(sale);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid sale data" });
-    }
-  });
-
-  app.delete("/api/sales/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const deleted = await storage.deleteSale(id);
-      if (!deleted) {
-        return res.status(404).json({ message: "Sale not found" });
-      }
-      res.status(204).send();
-    } catch (error) {
-      res.status(500).json({ message: "Failed to delete sale" });
-    }
-  });
 
   // Orders routes
   app.get("/api/orders", async (req, res) => {
@@ -536,10 +467,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/orders", async (req, res) => {
     try {
-      const orderData = insertOrderSchema.parse(req.body);
+      const orderData = baseInsertOrderSchema.parse(req.body);
+
+      // Validate that all adsIds exist and are available
+      for (const adsId of orderData.adsIds) {
+        const product = await storage.getProductByAdsId(adsId);
+        if (!product) {
+          return res.status(400).json({
+            message: `Product with adsId ${adsId} not found`
+          });
+        }
+        if (product.orderStatus !== "INVENTORY") {
+          return res.status(400).json({
+            message: `Product ${adsId} is not available (current status: ${product.orderStatus})`
+          });
+        }
+      }
+
+      // Create the order
       const order = await storage.createOrder(orderData);
+
+      // Update product statuses for all products in the order
+      const newOrderStatus = orderData.orderType; // "RENT" or "PURCHASE"
+      const newProdStatus = orderData.orderType === "RENT" ? "leased" : "sold";
+
+      for (const adsId of orderData.adsIds) {
+        // Update both orderStatus and prodStatus
+        await storage.updateProductOrderStatus(adsId, newOrderStatus);
+        await storage.updateProductProdStatus(adsId, newProdStatus);
+
+        // Create product date event for each product
+        await storage.createProductDateEvent({
+          adsId: adsId,
+          clientId: orderData.customerId,
+          eventType: orderData.orderType === "RENT" ? "leased" : "sold",
+          eventDate: orderData.contractDate,
+          notes: `Order ${order.orderId} - ${orderData.orderType}`,
+          createdAt: new Date().toISOString()
+        });
+      }
+
       res.status(201).json(order);
     } catch (error) {
+      console.error('Order creation error:', error);
       res.status(400).json({ message: "Invalid order data" });
     }
   });
@@ -547,7 +517,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.put("/api/orders/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const orderData = insertOrderSchema.partial().parse(req.body);
+      const orderData = baseInsertOrderSchema.partial().parse(req.body);
       const order = await storage.updateOrder(id, orderData);
       if (!order) {
         return res.status(404).json({ message: "Order not found" });
@@ -611,58 +581,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Client Requirements routes
-  app.get("/api/client-requirements", async (req, res) => {
-    try {
-      const requirements = await storage.getClientRequirements();
-      res.json(requirements);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch client requirements" });
-    }
-  });
-
-  app.post("/api/client-requirements", async (req, res) => {
-    try {
-      const requirementData = insertClientRequirementSchema.parse(req.body);
-      const requirement = await storage.createClientRequirement(requirementData);
-      res.status(201).json(requirement);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid requirement data" });
-    }
-  });
-
-  // Recovery Items routes
-  app.get("/api/recovery-items", async (req, res) => {
-    try {
-      const items = await storage.getRecoveryItems();
-      res.json(items);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch recovery items" });
-    }
-  });
-
-  app.post("/api/recovery-items", async (req, res) => {
-    try {
-      const itemData = insertRecoveryItemSchema.parse(req.body);
-      const item = await storage.createRecoveryItem(itemData);
-      
-      // Automatically track recovery event
-      if (item.adsId) {
-        await storage.createProductDateEvent({
-          adsId: item.adsId,
-          clientId: item.clientId || undefined,
-          eventType: EVENT_TYPES.RECOVERY_RECEIVED,
-          eventDate: item.recoveryDate,
-          notes: `Product received for recovery - ${item.brand} ${item.model}`,
-          createdAt: new Date().toISOString()
-        });
-      }
-      
-      res.status(201).json(item);
-    } catch (error) {
-      res.status(400).json({ message: "Invalid recovery item data" });
-    }
-  });
 
   // Product Date Events routes
   app.get("/api/product-date-events", async (req, res) => {
@@ -724,9 +642,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Dashboard stats
   app.get("/api/dashboard/stats", async (req, res) => {
     try {
-      const stats = await storage.getDashboardStats();
+      // Get basic stats from products and other tables
+      const products = await storage.getProducts();
+      const clients = await storage.getClients();
+      const orders = await storage.getOrders();
+      const salesBuy = await storage.getSalesBuy();
+      const salesRent = await storage.getSalesRent();
+
+      // Calculate stats
+      const totalInventory = products.length;
+      const activeClients = clients.filter(c => c.isActive).length;
+      const totalOrders = orders.length;
+
+      // Calculate revenue from sales_buy and sales_rent
+      const buyRevenue = salesBuy.reduce((sum, sale) => sum + parseFloat(sale.sellingPrice), 0);
+      const rentRevenue = salesRent.reduce((sum, sale) => sum + parseFloat(sale.leaseAmount), 0);
+      const monthlySales = buyRevenue + rentRevenue;
+
+      // Calculate recovery items (products that need attention)
+      const recoveryItems = products.filter(p =>
+        p.prodStatus === 'leased but not working' ||
+        p.prodStatus === 'maintenance' ||
+        p.prodHealth === 'maintenance'
+      ).length;
+
+      // Mock growth rates since we don't have historical sales data
+      const salesGrowth = 0; // Would need historical data
+      const clientGrowth = 0; // Would need historical data
+
+      const stats = {
+        totalInventory,
+        monthlySales,
+        activeClients,
+        recoveryItems,
+        salesGrowth,
+        clientGrowth,
+        totalOrders,
+        buyRevenue,
+        rentRevenue
+      };
+
       res.json(stats);
     } catch (error) {
+      console.error('Dashboard stats error:', error);
       res.status(500).json({ message: "Failed to fetch dashboard stats" });
     }
   });
@@ -821,6 +779,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
         error: "Production setup check failed",
         message: error instanceof Error ? error.message : "Unknown error"
       });
+    }
+  });
+
+  // Manual product status update endpoint
+  app.put("/api/products/:adsId/status", async (req, res) => {
+    try {
+      const { adsId } = req.params;
+      const { prodStatus } = req.body;
+
+      if (!prodStatus) {
+        return res.status(400).json({ message: "prodStatus is required" });
+      }
+
+      // Validate prodStatus is one of the allowed values
+      const allowedStatuses = ["leased", "sold", "leased but not working", "leased but maintenance", "available", "returned"];
+      if (!allowedStatuses.includes(prodStatus)) {
+        return res.status(400).json({
+          message: `Invalid prodStatus. Must be one of: ${allowedStatuses.join(", ")}`
+        });
+      }
+
+      // Check if product exists
+      const product = await storage.getProductByAdsId(adsId);
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      // Update product status
+      const success = await storage.updateProductProdStatus(adsId, prodStatus);
+
+      if (success) {
+        // Create product date event for status change
+        await storage.createProductDateEvent({
+          adsId: adsId,
+          eventType: 'status_updated',
+          eventDate: new Date().toISOString(),
+          notes: `Product status manually updated to: ${prodStatus}`,
+          createdAt: new Date().toISOString()
+        });
+
+        res.json({ message: "Product status updated successfully" });
+      } else {
+        res.status(500).json({ message: "Failed to update product status" });
+      }
+    } catch (error) {
+      console.error('Product status update error:', error);
+      res.status(500).json({ message: "Internal server error" });
     }
   });
 

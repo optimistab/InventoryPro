@@ -1,0 +1,58 @@
+
+> rest-express@1.2.0 dev
+> npm run db:reset && NODE_ENV=development tsx server/index.ts
+
+
+> rest-express@1.2.0 db:reset
+> tsx scripts/resetDatabase.ts
+
+[dotenv@17.2.1] injecting env (2) from .env -- tip: 📡 version env with Radar: https://dotenvx.com/radar
+🔄 Resetting database...
+📍 Environment: undefined
+🔗 Database URL exists: true
+🗑️  Dropping all tables...
+✅ Database schema reset successfully
+📦 Recreating database schema...
+🔄 Pushing current schema to database...
+No config path provided, using default 'drizzle.config.ts'
+Reading config file '/Users/abhayagrawal/WebProjects/InventoryPro/drizzle.config.ts'
+DATABASE_URL in drizzle.config.ts -- postgresql://postgres:User%40123@localhost:5432/inventoryprodb
+Using 'pg' driver for database querying
+[⣷] Pulling schema from database...
+[2K[1G[✓] Pulling schema from database...
+[✓] Changes applied
+✅ Database schema pushed successfully
+👥 Creating users...
+✅ Created user: admin_01 (admin) - Employee ID: ADS0001
+✅ Created user: admin_02 (admin) - Employee ID: ADS0002
+✅ Created user: admin_03 (admin) - Employee ID: ADS0003
+✅ Created user: dev_01 (developer) - Employee ID: ADS0004
+✅ Created user: dev_02 (developer) - Employee ID: ADS0005
+✅ Created user: support_01 (support) - Employee ID: ADS0006
+✅ Created user: support_02 (support) - Employee ID: ADS0007
+✅ Created user: sales_01 (salesperson) - Employee ID: ADS0008
+✅ Created user: sales_02 (salesperson) - Employee ID: ADS0009
+✅ Created user: sales_03 (salesperson) - Employee ID: ADS0010
+✅ Created user: sales_04 (salesperson) - Employee ID: ADS0011
+✅ Created user: sales_05 (salesperson) - Employee ID: ADS0012
+✅ Created user: sales_06 (salesperson) - Employee ID: ADS0013
+✅ Created user: sales_mgr_01 (salesmanager) - Employee ID: ADS0014
+✅ Created user: sales_mgr_02 (salesmanager) - Employee ID: ADS0015
+✅ Created user: inv_staff_01 (InventoryStaff) - Employee ID: ADS0016
+✅ Created user: inv_staff_02 (InventoryStaff) - Employee ID: ADS0017
+✅ Users created successfully!
+📊 Total users created: 17
+🔐 User login pattern: [username]123
+✅ Database connection test passed
+🎉 Database reset and user creation completed successfully!
+📝 You can now make schema changes and restart dev server
+🔐 User login pattern: [username]123 (e.g., admin_01 / admin_01123)
+🚀 Database is ready!
+[dotenv@17.2.1] injecting env (2) from .env -- tip: 📡 observe env with Radar: https://dotenvx.com/radar
+process.env.DATABASE_URL -- postgresql://postgres:User%40123@localhost:5432/inventoryprodb
+DATABASE_URL -- postgresql://postgres:User%40123@localhost:5432/inventoryprodb
+📊 Database setup completed
+9:06:17 PM [express] ✅ Database setup completed
+Registering routes...
+Routes registered successfully.
+9:06:17 PM [express] serving on port 5001

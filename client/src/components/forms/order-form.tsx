@@ -10,7 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Plus, Search, User, Package } from "lucide-react";
-import type { Client } from "@shared/schema";
+import { insertOrderSchema } from "@shared/schema";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import type { Client, InsertOrder } from "@shared/schema";
 
 interface OrderFormProps {
   onSuccess: () => void;
@@ -31,19 +35,37 @@ export default function OrderForm({ onSuccess, onCancel }: OrderFormProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Form setup with Zod validation
+  const form = useForm<InsertOrder>({
+    resolver: zodResolver(insertOrderSchema),
+    defaultValues: {
+      customerId: 0,
+      adsIds: [],
+      orderId: "",
+      orderType: "PURCHASE",
+      requiredPieces: 0,
+      deliveredPieces: 0,
+      paymentPerPiece: 0,
+      securityDeposit: undefined,
+      totalPaymentReceived: 0,
+      contractDate: new Date().toISOString(),
+      deliveryDate: undefined,
+      quotedPrice: undefined,
+      discount: undefined,
+      createdAt: new Date().toISOString(),
+      createdBy: "",
+      productType: "laptop",
+    },
+  });
+
   // Form state
   const [selectedCustomer, setSelectedCustomer] = useState<Client | null>(null);
-  const [orderType, setOrderType] = useState<"REN" | "PUR">("PUR");
   const [selectedProducts, setSelectedProducts] = useState<Array<{
     adsId: string;
     name: string;
     quantity: number;
     paymentPerPiece: number;
   }>>([]);
-  const [securityDeposit, setSecurityDeposit] = useState<string>("");
-  const [contractDate, setContractDate] = useState<string>(new Date().toISOString().split('T')[0]);
-  const [deliveryDate, setDeliveryDate] = useState<string>("");
-  const [notes, setNotes] = useState<string>("");
 
   // Search states
   const [customerSearch, setCustomerSearch] = useState("");
@@ -144,9 +166,7 @@ export default function OrderForm({ onSuccess, onCancel }: OrderFormProps) {
   });
 
   // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const onSubmit = (data: InsertOrder) => {
     if (!selectedCustomer) {
       toast({
         title: "Customer required",
@@ -165,31 +185,30 @@ export default function OrderForm({ onSuccess, onCancel }: OrderFormProps) {
       return;
     }
 
+    // Prepare the order data with proper schema structure
+    const adsIds = selectedProducts.map(p => p.adsId);
+    const totalQuantity = selectedProducts.reduce((sum, p) => sum + p.quantity, 0);
+    const primaryPaymentPerPiece = selectedProducts[0]?.paymentPerPiece || 0;
+
     const orderData = {
-      adsId: selectedProducts[0].adsId, // Primary product ADS ID
+      ...data,
       customerId: selectedCustomer.id,
+      adsIds: adsIds,
       orderId: generateOrderId(selectedCustomer.id),
-      orderStatus: orderType,
-      requiredPieces: selectedProducts.reduce((sum, p) => sum + p.quantity, 0),
-      deliveredPieces: 0,
-      paymentPerPiece: selectedProducts[0].paymentPerPiece, // Primary product price
-      securityDeposit: securityDeposit ? parseFloat(securityDeposit) : null,
-      totalPayment: calculateTotal(),
-      contractDate: new Date(contractDate).toISOString(),
-      deliveryDate: deliveryDate ? new Date(deliveryDate).toISOString() : null,
+      requiredPieces: totalQuantity,
+      paymentPerPiece: primaryPaymentPerPiece,
+      totalPaymentReceived: calculateTotal(),
       quotedPrice: calculateTotal(),
-      discount: null,
-      prodId: null, // Will be set from product data
-      prodName: selectedProducts[0].name,
-      prodCategory: products?.find(p => p.adsId === selectedProducts[0].adsId)?.category || "laptop",
-      createdAt: new Date().toISOString()
+      createdBy: "ADS0001", // Default employee ID
+      productType: products?.find(p => p.adsId === selectedProducts[0]?.adsId)?.category as "laptop" | "desktop" || "laptop",
     };
 
     createOrderMutation.mutate(orderData);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
       {/* Customer Selection */}
       <Card>
         <CardHeader>
@@ -273,15 +292,26 @@ export default function OrderForm({ onSuccess, onCancel }: OrderFormProps) {
           <CardTitle>Order Type</CardTitle>
         </CardHeader>
         <CardContent>
-          <Select value={orderType} onValueChange={(value: "REN" | "PUR") => setOrderType(value)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="PUR">Purchase (One-time Payment)</SelectItem>
-              <SelectItem value="REN">Rental (Monthly Payment)</SelectItem>
-            </SelectContent>
-          </Select>
+          <FormField
+            control={form.control}
+            name="orderType"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="PURCHASE">Purchase (One-time Payment)</SelectItem>
+                      <SelectItem value="RENT">Rental (Monthly Payment)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </CardContent>
       </Card>
 
@@ -484,6 +514,7 @@ export default function OrderForm({ onSuccess, onCancel }: OrderFormProps) {
           )}
         </Button>
       </div>
-    </form>
+      </form>
+    </Form>
   );
 }

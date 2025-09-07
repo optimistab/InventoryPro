@@ -9,7 +9,7 @@ import { useState } from "react";
 import SaleForm from "@/components/forms/sale-form";
 import PaymentForm from "@/components/forms/payment-form";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import type { SaleWithDetails } from "@shared/schema";
+import type { SalesBuy, SalesRent } from "@shared/schema";
 
 export default function Sales() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -17,15 +17,28 @@ export default function Sales() {
   const [isPaymentFormOpen, setIsPaymentFormOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState<string>("");
 
-  const { data: sales, isLoading } = useQuery<SaleWithDetails[]>({
-    queryKey: ["/api/sales"],
+  const { data: salesBuy, isLoading: buyLoading } = useQuery<SalesBuy[]>({
+    queryKey: ["/api/sales-buy"],
   });
 
-  const filteredSales = sales?.filter(sale =>
-    sale.client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    sale.product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    sale.product.sku.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const { data: salesRent, isLoading: rentLoading } = useQuery<SalesRent[]>({
+    queryKey: ["/api/sales-rent"],
+  });
+
+  const isLoading = buyLoading || rentLoading;
+
+  // Combine and filter sales data
+  const allSales = [
+    ...(salesBuy || []).map(sale => ({ ...sale, type: 'buy' as const })),
+    ...(salesRent || []).map(sale => ({ ...sale, type: 'rent' as const }))
+  ];
+
+  const filteredSales = allSales.filter(sale =>
+    sale.adsId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    sale.customerId.toString().includes(searchTerm) ||
+    sale.empId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (sale.type === 'buy' && sale.orderId?.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
   if (isLoading) {
     return (
@@ -62,7 +75,13 @@ export default function Sales() {
     );
   }
 
-  const totalSales = filteredSales.reduce((sum, sale) => sum + parseFloat(sale.totalAmount), 0);
+  const totalSales = filteredSales.reduce((sum, sale) => {
+    if (sale.type === 'buy') {
+      return sum + parseFloat(sale.sellingPrice);
+    } else {
+      return sum + parseFloat(sale.leaseAmount);
+    }
+  }, 0);
 
   return (
     <div className="pt-16 lg:pt-0">
@@ -125,7 +144,7 @@ export default function Sales() {
             <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
           </div>
           <div className="text-sm text-gray-600">
-            {filteredSales.length} of {sales?.length || 0} sales
+            {filteredSales.length} of {allSales.length} sales
           </div>
         </div>
 
@@ -147,88 +166,100 @@ export default function Sales() {
         ) : (
           <div className="space-y-4">
             {filteredSales.map((sale) => (
-              <Card key={sale.id} className="border border-gray-100 hover:shadow-md transition-shadow">
+              <Card key={`${sale.type}-${sale.id}`} className="border border-gray-100 hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
                       <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                        {sale.product.category === "laptop" ? (
-                          <Laptop className="h-6 w-6 text-gray-600" />
+                        {sale.type === 'buy' ? (
+                          <Receipt className="h-6 w-6 text-gray-600" />
                         ) : (
-                          <Monitor className="h-6 w-6 text-gray-600" />
+                          <CreditCard className="h-6 w-6 text-gray-600" />
                         )}
                       </div>
-                      
+
                       <div className="flex-1">
                         <div className="flex items-center space-x-4">
                           <div>
-                            <h3 className="font-semibold text-gray-900">{sale.product.name}</h3>
-                            <p className="text-sm text-gray-600">SKU: {sale.product.sku}</p>
+                            <h3 className="font-semibold text-gray-900">
+                              {sale.type === 'buy' ? 'Purchase Sale' : 'Rental Sale'}
+                            </h3>
+                            <p className="text-sm text-gray-600">ADS ID: {sale.adsId}</p>
                           </div>
-                          
+
                           <div className="border-l border-gray-200 pl-4">
-                            <p className="font-medium text-gray-900">{sale.client.name}</p>
-                            <p className="text-sm text-gray-600">{sale.client.email}</p>
+                            <p className="font-medium text-gray-900">Customer ID: {sale.customerId}</p>
+                            {sale.type === 'buy' && sale.orderId && (
+                              <p className="text-sm text-gray-600">Order: {sale.orderId}</p>
+                            )}
                           </div>
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="flex items-center space-x-6">
+                      {sale.type === 'rent' && (
+                        <div className="text-right">
+                          <p className="text-sm text-gray-600">Leased Qty</p>
+                          <p className="font-semibold">{sale.leasedQuantity}</p>
+                        </div>
+                      )}
+
                       <div className="text-right">
-                        <p className="text-sm text-gray-600">Quantity</p>
-                        <p className="font-semibold">{sale.quantity}</p>
-                      </div>
-                      
-                      <div className="text-right">
-                        <p className="text-sm text-gray-600">Unit Price</p>
-                        <p className="font-semibold">₹{parseFloat(sale.unitPrice).toLocaleString()}</p>
-                      </div>
-                      
-                      <div className="text-right">
-                        <p className="text-sm text-gray-600">Total</p>
-                        <p className="text-lg font-bold text-gray-900">
-                          ₹{parseFloat(sale.totalAmount).toLocaleString()}
+                        <p className="text-sm text-gray-600">
+                          {sale.type === 'buy' ? 'Selling Price' : 'Lease Amount'}
+                        </p>
+                        <p className="font-semibold">
+                          ₹{parseFloat(sale.type === 'buy' ? sale.sellingPrice : sale.leaseAmount).toLocaleString()}
                         </p>
                       </div>
-                      
+
+                      <div className="text-right">
+                        <p className="text-sm text-gray-600">Cost Price</p>
+                        <p className="font-semibold">
+                          ₹{sale.type === 'buy' ? parseFloat(sale.costPrice).toLocaleString() : 'N/A'}
+                        </p>
+                      </div>
+
                       <div className="text-right">
                         <p className="text-sm text-gray-600">Date</p>
-                        <p className="font-medium">{new Date(sale.saleDate).toLocaleDateString()}</p>
+                        <p className="font-medium">
+                          {new Date(sale.type === 'buy' ? sale.salesDate : sale.paymentDate).toLocaleDateString()}
+                        </p>
                       </div>
-                      
+
                       <div className="flex flex-col items-end space-y-2">
                         <Badge
-                          variant={sale.status === "completed" ? "default" : "secondary"}
+                          variant={sale.type === 'buy' ? "default" : "secondary"}
                           className={
-                            sale.status === "completed"
-                              ? "bg-green-100 text-success hover:bg-green-100"
-                              : sale.status === "pending"
-                              ? "bg-yellow-100 text-warning hover:bg-yellow-100"
-                              : "bg-red-100 text-error hover:bg-red-100"
+                            sale.type === 'buy'
+                              ? "bg-blue-100 text-blue-800 hover:bg-blue-100"
+                              : "bg-green-100 text-green-800 hover:bg-green-100"
                           }
                         >
-                          {sale.status}
+                          {sale.type === 'buy' ? 'Purchase' : 'Rental'}
                         </Badge>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            // TODO: Link to order for payment
-                            setSelectedOrderId(`ORD₹{sale.clientId}001`); // Placeholder
-                            setIsPaymentFormOpen(true);
-                          }}
-                        >
-                          <CreditCard className="h-4 w-4 mr-1" />
-                          Record Payment
-                        </Button>
+                        {sale.type === 'rent' && (
+                          <Badge
+                            variant={sale.paymentStatus === "Complete" ? "default" : "secondary"}
+                            className={
+                              sale.paymentStatus === "Complete"
+                                ? "bg-green-100 text-green-800 hover:bg-green-100"
+                                : sale.paymentStatus === "Pending"
+                                ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
+                                : "bg-blue-100 text-blue-800 hover:bg-blue-100"
+                            }
+                          >
+                            {sale.paymentStatus}
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   </div>
-                  
-                  {sale.notes && (
+
+                  {sale.type === 'buy' && sale.miscCost && (
                     <div className="mt-4 pt-4 border-t border-gray-100">
-                      <p className="text-sm text-gray-600">{sale.notes}</p>
+                      <p className="text-sm text-gray-600">Misc Cost: ₹{parseFloat(sale.miscCost).toLocaleString()}</p>
                     </div>
                   )}
                 </CardContent>

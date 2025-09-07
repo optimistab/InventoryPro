@@ -1,16 +1,14 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { insertSaleSchema } from "@shared/schema";
+import { insertSalesBuySchema } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import type { InsertSale, Product, Client } from "@shared/schema";
-import { useEffect } from "react";
+import type { InsertSalesBuy, Product, Client } from "@shared/schema";
 
 interface SaleFormProps {
   onSuccess: () => void;
@@ -29,60 +27,50 @@ export default function SaleForm({ onSuccess, onCancel }: SaleFormProps) {
     queryKey: ["/api/clients"],
   });
 
-  const form = useForm<InsertSale>({
-    resolver: zodResolver(insertSaleSchema),
+  const form = useForm<InsertSalesBuy>({
+    resolver: zodResolver(insertSalesBuySchema),
     defaultValues: {
-      clientId: 0,
       adsId: "",
-      quantity: 1,
-      unitPrice: "0",
-      totalAmount: "0",
-      saleDate: new Date().toISOString().split('T')[0],
-      status: "completed",
-      notes: "",
+      salesDate: new Date().toISOString().split('T')[0],
+      costPrice: "0",
+      sellingPrice: "0",
+      customerId: 0,
+      orderId: "",
+      miscCost: "",
+      empId: "",
+      createdBy: "",
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     },
   });
 
   const selectedAdsId = form.watch("adsId");
-  const quantity = form.watch("quantity");
-
-  // Update unit price and total when product changes
-  useEffect(() => {
-    if (selectedAdsId && products) {
-      const product = products.find(p => p.adsId === selectedAdsId);
-      if (product) {
-        const unitPrice = parseFloat(product.price);
-        form.setValue("unitPrice", product.price);
-        form.setValue("totalAmount", (unitPrice * quantity).toFixed(2));
-      }
-    }
-  }, [selectedAdsId, quantity, products, form]);
 
   const createSaleMutation = useMutation({
-    mutationFn: async (data: InsertSale) => {
-      const response = await apiRequest("POST", "/api/sales", data);
+    mutationFn: async (data: InsertSalesBuy) => {
+      const response = await apiRequest("POST", "/api/sales-buy", data);
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/sales"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/sales-buy"] });
       queryClient.invalidateQueries({ queryKey: ["/api/products"] });
       queryClient.invalidateQueries({ queryKey: ["/api/dashboard/stats"] });
       toast({
         title: "Success",
-        description: "Sale recorded successfully",
+        description: "Purchase sale recorded successfully",
       });
       onSuccess();
     },
     onError: () => {
       toast({
         title: "Error",
-        description: "Failed to record sale",
+        description: "Failed to record purchase sale",
         variant: "destructive",
       });
     },
   });
 
-  const onSubmit = (data: InsertSale) => {
+  const onSubmit = (data: InsertSalesBuy) => {
     createSaleMutation.mutate(data);
   };
 
@@ -92,14 +80,14 @@ export default function SaleForm({ onSuccess, onCancel }: SaleFormProps) {
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="clientId"
+            name="customerId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Client</FormLabel>
+                <FormLabel>Customer</FormLabel>
                 <Select onValueChange={(value) => field.onChange(parseInt(value))}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select client" />
+                      <SelectValue placeholder="Select customer" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -128,9 +116,9 @@ export default function SaleForm({ onSuccess, onCancel }: SaleFormProps) {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    {products?.filter(p => p.stockQuantity > 0).map((product) => (
+                    {products?.map((product) => (
                       <SelectItem key={product.adsId} value={product.adsId}>
-                        {product.name} - ₹{product.price} (Stock: {product.stockQuantity})
+                        {product.brand} {product.model} - {product.referenceNumber}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -141,24 +129,19 @@ export default function SaleForm({ onSuccess, onCancel }: SaleFormProps) {
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="quantity"
+            name="costPrice"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Quantity</FormLabel>
+                <FormLabel>Cost Price (₹)</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="number" 
-                    min="1"
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
                     {...field}
-                    onChange={(e) => {
-                      const qty = parseInt(e.target.value) || 1;
-                      field.onChange(qty);
-                      const unitPrice = parseFloat(form.getValues("unitPrice"));
-                      form.setValue("totalAmount", (unitPrice * qty).toFixed(2));
-                    }}
                   />
                 </FormControl>
                 <FormMessage />
@@ -168,36 +151,17 @@ export default function SaleForm({ onSuccess, onCancel }: SaleFormProps) {
 
           <FormField
             control={form.control}
-            name="unitPrice"
+            name="sellingPrice"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Unit Price (₹)</FormLabel>
+                <FormLabel>Selling Price (₹)</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="number" 
-                    step="0.01" 
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
                     {...field}
-                    onChange={(e) => {
-                      field.onChange(e.target.value);
-                      const qty = form.getValues("quantity");
-                      const unitPrice = parseFloat(e.target.value) || 0;
-                      form.setValue("totalAmount", (unitPrice * qty).toFixed(2));
-                    }}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="totalAmount"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Total Amount (₹)</FormLabel>
-                <FormControl>
-                  <Input type="number" step="0.01" readOnly {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -208,10 +172,10 @@ export default function SaleForm({ onSuccess, onCancel }: SaleFormProps) {
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="saleDate"
+            name="salesDate"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Sale Date</FormLabel>
+                <FormLabel>Sales Date</FormLabel>
                 <FormControl>
                   <Input type="date" {...field} />
                 </FormControl>
@@ -222,53 +186,60 @@ export default function SaleForm({ onSuccess, onCancel }: SaleFormProps) {
 
           <FormField
             control={form.control}
-            name="status"
+            name="orderId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Status</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormLabel>Order ID (Optional)</FormLabel>
+                <FormControl>
+                  <Input placeholder="ORD001" {...field} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
         </div>
 
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notes (Optional)</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Additional notes about the sale..."
-                  className="min-h-[60px]"
-                  {...field}
-                  value={field.value || ''}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="miscCost"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Miscellaneous Cost (₹)</FormLabel>
+                <FormControl>
+                  <Input
+                    type="number"
+                    step="0.01"
+                    placeholder="0.00"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="empId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Employee ID</FormLabel>
+                <FormControl>
+                  <Input placeholder="ADS0001" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <div className="flex justify-end space-x-2 pt-4">
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
           <Button type="submit" disabled={createSaleMutation.isPending}>
-            {createSaleMutation.isPending ? "Recording..." : "Record Sale"}
+            {createSaleMutation.isPending ? "Recording..." : "Record Purchase Sale"}
           </Button>
         </div>
       </form>

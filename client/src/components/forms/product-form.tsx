@@ -25,18 +25,22 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
   const form = useForm<InsertProduct>({
     resolver: zodResolver(insertProductSchema),
     defaultValues: {
-      name: "",
-      sku: "",
       brand: "",
       model: "",
-      category: "laptop",
+      productType: "laptop",
       condition: "new",
-      price: "0",
-      cost: "0",
-      stockQuantity: 1,
+      costPrice: 0,
       specifications: "",
-      description: "",
-      isActive: true,
+      prodId: "",
+      prodHealth: "working",
+      prodStatus: "available",
+      lastAuditDate: "",
+      auditStatus: "",
+      returnDate: "",
+      maintenanceDate: "",
+      maintenanceStatus: "",
+      orderStatus: "INVENTORY",
+      createdBy: "",
     },
   });
 
@@ -48,33 +52,41 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
   useEffect(() => {
     if (product) {
       form.reset({
-        name: product.name,
-        sku: product.sku,
         brand: product.brand,
         model: product.model,
-        category: product.category,
-        condition: product.condition,
-        price: product.price,
-        cost: product.cost,
-        stockQuantity: product.stockQuantity,
+        productType: (product.productType === "laptop" || product.productType === "desktop") ? product.productType : "laptop",
+        condition: product.condition as "new" | "refurbished" | "used" || "new",
+        costPrice: parseFloat(product.costPrice) || 0,
         specifications: product.specifications || "",
-        description: product.description || "",
-        isActive: product.isActive,
+        prodId: product.prodId || "",
+        prodHealth: product.prodHealth as "working" | "maintenance" | "expired" || "working",
+        prodStatus: product.prodStatus as "available" | "leased" | "sold" | "leased but not working" | "leased but maintenance" | "returned" || "available",
+        lastAuditDate: product.lastAuditDate || "",
+        auditStatus: product.auditStatus || "",
+        returnDate: product.returnDate || "",
+        maintenanceDate: product.maintenanceDate || "",
+        maintenanceStatus: product.maintenanceStatus || "",
+        orderStatus: product.orderStatus as "INVENTORY" | "RENT" | "PURCHASE" || "INVENTORY",
+        createdBy: product.createdBy || "",
       });
     } else {
       form.reset({
-        name: "",
-        sku: "",
         brand: "",
         model: "",
-        category: "laptop",
+        productType: "laptop",
         condition: "new",
-        price: "0",
-        cost: "0",
-        stockQuantity: 1,
+        costPrice: 0,
         specifications: "",
-        description: "",
-        isActive: true,
+        prodId: "",
+        prodHealth: "working",
+        prodStatus: "available",
+        lastAuditDate: "",
+        auditStatus: "",
+        returnDate: "",
+        maintenanceDate: "",
+        maintenanceStatus: "",
+        orderStatus: "INVENTORY",
+        createdBy: "",
       });
     }
   }, [product, form]);
@@ -111,7 +123,7 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
   const updateProductMutation = useMutation({
     mutationFn: async (data: InsertProduct) => {
       if (!product) throw new Error("No product to update");
-      const response = await apiRequest("PUT", `/api/products/₹{product.id}`, data);
+      const response = await apiRequest("PUT", `/api/products/${product.adsId}`, data);
       return response.json();
     },
     onSuccess: () => {
@@ -148,12 +160,12 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="name"
+            name="brand"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Product Name</FormLabel>
+                <FormLabel>Brand</FormLabel>
                 <FormControl>
-                  <Input placeholder="MacBook Pro 16-inch" {...field} />
+                  <Input placeholder="Apple" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -162,12 +174,12 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
 
           <FormField
             control={form.control}
-            name="sku"
+            name="model"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>SKU</FormLabel>
+                <FormLabel>Model</FormLabel>
                 <FormControl>
-                  <Input placeholder="MBP16-001" {...field} />
+                  <Input placeholder="MacBook Pro" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -222,14 +234,14 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="category"
+            name="productType"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Category</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <FormLabel>Product Type</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || "laptop"}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
+                      <SelectValue placeholder="Select product type" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -266,27 +278,13 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
           />
         </div>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="price"
+            name="costPrice"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price (₹)</FormLabel>
-                <FormControl>
-                  <Input type="number" step="0.01" placeholder="1999.99" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="cost"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Cost (₹)</FormLabel>
+                <FormLabel>Cost Price (₹)</FormLabel>
                 <FormControl>
                   <Input type="number" step="0.01" placeholder="1499.99" {...field} />
                 </FormControl>
@@ -297,17 +295,102 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
 
           <FormField
             control={form.control}
-            name="stockQuantity"
+            name="prodId"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Stock Quantity</FormLabel>
+                <FormLabel>Product ID</FormLabel>
                 <FormControl>
-                  <Input 
-                    type="number" 
-                    placeholder="10" 
-                    {...field}
-                    onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                  />
+                  <Input placeholder="MBP001" {...field} value={field.value || ""} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="prodHealth"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Product Health</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || "working"}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select health status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="working">Working</SelectItem>
+                    <SelectItem value="maintenance">Maintenance</SelectItem>
+                    <SelectItem value="expired">Expired</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="prodStatus"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Product Status</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || "available"}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="available">Available</SelectItem>
+                    <SelectItem value="leased">Leased</SelectItem>
+                    <SelectItem value="sold">Sold</SelectItem>
+                    <SelectItem value="leased but not working">Leased but not working</SelectItem>
+                    <SelectItem value="leased but maintenance">Leased but maintenance</SelectItem>
+                    <SelectItem value="returned">Returned</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="orderStatus"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Order Status</FormLabel>
+                <Select onValueChange={field.onChange} value={field.value || "INVENTORY"}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select order status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="RENT">Rent</SelectItem>
+                    <SelectItem value="PURCHASE">Purchase</SelectItem>
+                    <SelectItem value="INVENTORY">Inventory</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="createdBy"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Created By (Employee ID)</FormLabel>
+                <FormControl>
+                  <Input placeholder="ADS0001" {...field} value={field.value || ""} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -334,24 +417,6 @@ export default function ProductForm({ product, onSuccess, onCancel }: ProductFor
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Textarea
-                  placeholder="Product description..."
-                  className="min-h-[60px]"
-                  {...field}
-                  value={field.value || ""}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
 
         <div className="flex justify-end space-x-2 pt-4">
           <Button type="button" variant="outline" onClick={onCancel}>

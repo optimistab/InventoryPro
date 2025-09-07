@@ -1,5 +1,4 @@
 import { drizzle } from 'drizzle-orm/node-postgres';
-import { migrate } from 'drizzle-orm/node-postgres/migrator';
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
 import { sql } from 'drizzle-orm';
@@ -44,28 +43,13 @@ async function resetDatabase() {
 
     console.log('✅ Database schema reset successfully');
 
-    // Clear migration journal to start fresh
-    console.log('🧹 Clearing migration journal...');
-    const fs = await import('fs');
-    const path = await import('path');
-
-    const journalPath = path.join(process.cwd(), 'migrations/meta/_journal.json');
-    if (fs.existsSync(journalPath)) {
-      fs.writeFileSync(journalPath, JSON.stringify({
-        version: "7",
-        dialect: "postgresql",
-        entries: []
-      }, null, 2));
-      console.log('✅ Migration journal cleared');
-    }
-
     console.log('📦 Recreating database schema...');
 
     // Use drizzle-kit push to apply current schema
     console.log('🔄 Pushing current schema to database...');
     const { execSync } = await import('child_process');
     try {
-      execSync('npm run db:push', { stdio: 'inherit' });
+      execSync('npx drizzle-kit push', { stdio: 'inherit' });
       console.log('✅ Database schema pushed successfully');
     } catch (pushError) {
       console.error('❌ Failed to push schema:', pushError);

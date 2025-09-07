@@ -54,13 +54,13 @@ export default function InventoryDistribution({ products, isLoading }: Inventory
   }
 
   // Calculate distribution
-  const laptops = products.filter(p => p.category === "laptop");
-  const desktops = products.filter(p => p.category === "desktop");
+  const laptops = products.filter(p => p.productType === "laptop");
+  const desktops = products.filter(p => p.productType === "desktop");
   const refurbished = products.filter(p => p.condition === "refurbished");
 
-  const laptopCount = laptops.reduce((sum, p) => sum + p.stockQuantity, 0);
-  const desktopCount = desktops.reduce((sum, p) => sum + p.stockQuantity, 0);
-  const refurbishedCount = refurbished.reduce((sum, p) => sum + p.stockQuantity, 0);
+  const laptopCount = laptops.length;
+  const desktopCount = desktops.length;
+  const refurbishedCount = refurbished.length;
 
   const total = laptopCount + desktopCount + refurbishedCount;
 
